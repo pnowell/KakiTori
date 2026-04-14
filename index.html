@@ -1,0 +1,1052 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Kanji Drawing Practice</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body { touch-action: none; overscroll-behavior: none; }
+        canvas { 
+            touch-action: none;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            background-image: 
+                linear-gradient(to right, #f0f0f0 1px, transparent 1px),
+                linear-gradient(to bottom, #f0f0f0 1px, transparent 1px),
+                linear-gradient(to right, #e0e0e0 2px, transparent 2px),
+                linear-gradient(to bottom, #e0e0e0 2px, transparent 2px);
+            background-size: 50% 50%, 50% 50%, 100% 100%, 100% 100%;
+            background-position: center center;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 h-screen w-screen flex flex-col items-center py-8 font-sans overflow-hidden">
+
+    <!-- Main View -->
+    <div id="main-view" class="w-full max-w-md px-4 flex flex-col items-center h-full">
+        <!-- Header / Prompt -->
+        <div class="bg-white rounded-2xl shadow-sm p-6 mb-6 w-full text-center relative">
+            <button id="settings-btn" class="absolute top-4 right-4 p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-full transition-colors">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+            </button>
+            <h1 class="text-sm text-gray-500 uppercase tracking-wider font-bold mb-1">Draw the Kanji for:</h1>
+            <h2 id="prompt-meaning" class="text-3xl font-extrabold text-indigo-600 mb-1">Loading...</h2>
+        </div>
+
+        <!-- Canvas Container -->
+        <div class="relative w-full aspect-square bg-white rounded-xl mb-6 relative">
+            <canvas id="draw-canvas" class="w-full h-full rounded-xl cursor-crosshair"></canvas>
+            
+            <!-- Hidden SVG for Path Resampling -->
+            <svg id="svg-helper" style="display:none;"><path id="svg-path" d=""/></svg>
+        </div>
+
+        <!-- Progress / Controls -->
+        <div class="flex justify-between items-center w-full">
+            <div id="progress-text" class="text-gray-500 font-medium">Stroke 1 / X</div>
+            <button id="skip-btn" class="px-4 py-2 bg-gray-200 hover:bg-gray-300 rounded-lg text-gray-700 font-medium transition-colors">
+                Skip Kanji
+            </button>
+        </div>
+        
+        <div id="message-area" class="mt-4 text-red-500 font-bold h-6 transition-opacity duration-300 opacity-0 text-center">
+            Message Area
+        </div>
+    </div>
+
+    <!-- Settings View -->
+    <div id="settings-view" class="w-full max-w-md px-4 flex flex-col hidden h-full max-h-screen overflow-hidden pb-8">
+        <div class="flex justify-between items-center mb-4 mt-2">
+            <h2 class="text-2xl font-bold text-gray-800">Select Kanji</h2>
+            <button id="close-settings-btn" class="p-2 bg-gray-200 text-gray-700 rounded-full hover:bg-gray-300 transition-colors">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+            </button>
+        </div>
+        <div id="kanji-list-container" class="flex-1 overflow-y-auto bg-white rounded-xl shadow-sm p-4 space-y-4">
+            <!-- Dynamically populated -->
+        </div>
+    </div>
+
+    <script>
+        // --- DATA: Compact Kanji Dictionary ---
+        const RAW_KANJI_DATA = `
+一|One|いち|1
+二|Two|に|1
+三|Three|さん|1
+四|Four|よん|1
+五|Five|ご|1
+六|Six|ろく|1
+七|Seven|なな|1
+八|Eight|はち|1
+九|Nine|きゅう|1
+十|Ten|じゅう|1
+百|Hundred|ひゃく|1
+千|Thousand|せん|1
+上|Above|うえ|1
+下|Below|した|1
+左|Left|ひだり|1
+右|Right|みぎ|1
+中|Inside|なか|1
+大|Large|おお|1
+小|Small|ちい(さい)|1
+月|Month/Moon|つき|1
+日|Day/Sun|ひ|1
+年|Year|とし|1
+早|Early|はや(い)|1
+木|Tree|き|1
+林|Woods|はやし|1
+山|Mountain|やま|1
+川|River|かわ|1
+土|Soil|つち|1
+空|Sky|そら|1
+田|Rice field|た(んぼ)|1
+天|Heaven|てん|1
+生|Life|い(きる)|1
+花|Flower|はな|1
+草|Grass|くさ|1
+虫|Insect|むし|1
+犬|Dog|いぬ|1
+人|Person|ひと|1
+名|Name|な(まえ)|1
+女|Woman|おんな|1
+男|Man|おとこ|1
+子|Child|こ|1
+目|Eye|め|1
+耳|Ear|みみ|1
+口|Mouth|くち|1
+手|Hand|て|1
+足|Foot|あし|1
+見|See|み(る)|1
+音|Sound|おと|1
+力|Power|ちから|1
+気|Spirit|き|1
+円|Yen/Circle|えん|1
+入|Enter|はい(る)|1
+出|Exit|で(る)|1
+立|Stand|た(つ)|1
+休|Rest|やす(い)|1
+先|Previous|さき|1
+夕|Evening|ゆう|1
+本|Book|ほん|1
+文|Text|ぶん,も(じ)|1
+字|Character|(も)じ|1
+学|Study (of)|(すう)がく|1
+校|School|(がっ)こう|1
+村|Village|むら|1
+町|Town|まち|1
+森|Forest|もり|1
+正|Correct|ただ(しい)|1
+水|Water|みず|1
+火|Fire|ひ|1
+玉|Jewel,Ball|たま|1
+王|King|おう|1
+白|White|しろ(い)|1
+竹|Bamboo|たけ|1
+糸|Thread|いと|1
+車|Car|くるま|1
+貝|Shell|かい|1
+赤|Red|あか|1
+走|Run|はし|1
+雨|Rain|あめ(がふる)|1
+青|Blue|あお|1
+金|Gold|きん|1
+何|What|なに|2
+今|Now|いま|2
+春|Spring|はる|2
+夏|Summer|なつ|2
+秋|Autumn|あき|2
+冬|Winter|ふゆ|2
+行|Go|い(く)|2
+来|Come|く(る)|2
+食|Eat|た(べる)|2
+飲|Drink|の(む)|2
+会|Meet|あ(う)|2
+多|Many|おお(い)|2
+少|Few|すく(ない)|2
+古|Old|ふる(い)|2
+新|New|あたら(しい)|2
+高|High|たか(い)|2
+長|Long|なが(い)|2
+広|Wide|ひろ(い)|2
+兄|Older Brother|あに|2
+弟|Younger Brother|おとうと|2
+`;
+
+        const KANJI_DATABASE = RAW_KANJI_DATA.trim().split('\n').map(line => {
+            const [kanji, meaning, hiragana, grade] = line.split('|');
+            return { kanji, meaning, hiragana, grade: parseInt(grade, 10) };
+        });
+
+        // --- COMPOSITE SCORING THRESHOLDS (TUNABLE) ---
+        const NUM_POINTS = 50; 
+        const MIN_SCALE = 0.8;        
+
+        const THRESHOLDS = {
+            stroke1: {
+                directionDeg: 35, 
+                rmsBase: 25       
+            },
+            subsequent: {
+                directionDeg: 30, 
+                rmsBase: 18,      
+                lengthMin: 0.6,   
+                lengthMax: 1.5,   
+                lengthBufferPx: 30 
+            }
+        };
+
+        const MIN_DISTANCE = 4;
+
+        // --- LOCAL STORAGE CHECK ---
+        let storageAvailable = false;
+        try {
+            const testKey = '__storage_test__';
+            window.localStorage.setItem(testKey, testKey);
+            window.localStorage.removeItem(testKey);
+            storageAvailable = true;
+        } catch (e) {
+            console.warn("Local storage unavailable (sandboxed/private mode). Settings will not persist.");
+            storageAvailable = false;
+        }
+
+        // --- STATE ---
+        let userSelectedKanji = new Set(KANJI_DATABASE.map(k => k.kanji));
+        let kanjiIntervals = {};
+        
+        if (storageAvailable) {
+            const savedPrefs = localStorage.getItem('kanjiSelectionPrefs');
+            if (savedPrefs) {
+                try {
+                    const parsed = JSON.parse(savedPrefs);
+                    if (Array.isArray(parsed) && parsed.length > 0) {
+                        userSelectedKanji = new Set(parsed);
+                    }
+                } catch(e) { console.error("Failed to parse saved settings.", e); }
+            }
+
+            const savedIntervals = localStorage.getItem('kanjiIntervalsPrefs');
+            if (savedIntervals) {
+                try { kanjiIntervals = JSON.parse(savedIntervals); } 
+                catch(e) { console.error("Failed to parse saved intervals.", e); }
+            }
+        }
+
+        let reviewQueue = [];
+        let currentKanjiData = null;
+        let expectedStrokes = []; 
+        let currentStrokeIdx = 0;
+        let deckNeedsReinit = false;
+        
+        let frameScale = 1;
+        let frameOffsetX = 0;
+        let frameOffsetY = 0;
+
+        let completedStrokes = []; 
+        let activeStroke = [];     
+        let morphState = null;     
+        let failCount = 0;
+        
+        let usedHintForKanji = false;
+        let isSuccessAnimating = false;
+        let confettiParticles = [];
+        let finalScale = 1;
+        let finalOffsetX = 0;
+        let finalOffsetY = 0;
+        let successStartTime = 0;
+
+        let isDrawing = false;
+        let isShaking = false;
+        let shakeOffset = 0;
+        let strokeColor = "#374151"; 
+
+        // --- DOM Elements ---
+        const mainView = document.getElementById('main-view');
+        const settingsView = document.getElementById('settings-view');
+        const canvas = document.getElementById('draw-canvas');
+        const ctx = canvas.getContext('2d');
+        const svgPathEl = document.getElementById('svg-path');
+        const promptMeaning = document.getElementById('prompt-meaning');
+        const progressText = document.getElementById('progress-text');
+        const messageArea = document.getElementById('message-area');
+
+        // --- AUDIO ---
+        let audioCtx;
+        function playErrorBeep() {
+            if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            const oscillator = audioCtx.createOscillator();
+            const gainNode = audioCtx.createGain();
+            oscillator.type = 'triangle';
+            oscillator.frequency.setValueAtTime(200, audioCtx.currentTime);
+            oscillator.frequency.exponentialRampToValueAtTime(100, audioCtx.currentTime + 0.2);
+            gainNode.gain.setValueAtTime(0.3, audioCtx.currentTime);
+            gainNode.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.2);
+            oscillator.connect(gainNode);
+            gainNode.connect(audioCtx.destination);
+            oscillator.start();
+            oscillator.stop(audioCtx.currentTime + 0.2);
+        }
+
+        function playSuccessChime() {
+            if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            const oscillator = audioCtx.createOscillator();
+            const gainNode = audioCtx.createGain();
+            oscillator.type = 'sine';
+            oscillator.frequency.setValueAtTime(600, audioCtx.currentTime);
+            oscillator.frequency.exponentialRampToValueAtTime(1200, audioCtx.currentTime + 0.3);
+            gainNode.gain.setValueAtTime(0.3, audioCtx.currentTime);
+            gainNode.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.5);
+            oscillator.connect(gainNode);
+            gainNode.connect(audioCtx.destination);
+            oscillator.start();
+            oscillator.stop(audioCtx.currentTime + 0.5);
+        }
+
+        function playPartyPopper() {
+            if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            const osc = audioCtx.createOscillator();
+            const gainNode = audioCtx.createGain();
+            osc.type = 'triangle';
+            osc.frequency.setValueAtTime(800, audioCtx.currentTime);
+            osc.frequency.exponentialRampToValueAtTime(100, audioCtx.currentTime + 0.2);
+            gainNode.gain.setValueAtTime(0.5, audioCtx.currentTime);
+            gainNode.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.2);
+            osc.connect(gainNode);
+            gainNode.connect(audioCtx.destination);
+            osc.start();
+            osc.stop(audioCtx.currentTime + 0.2);
+            
+            const bufferSize = audioCtx.sampleRate * 0.5; 
+            const buffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
+            const data = buffer.getChannelData(0);
+            for (let i = 0; i < bufferSize; i++) data[i] = Math.random() * 2 - 1;
+            
+            const noise = audioCtx.createBufferSource();
+            noise.buffer = buffer;
+            const noiseFilter = audioCtx.createBiquadFilter();
+            noiseFilter.type = 'lowpass';
+            noiseFilter.frequency.value = 5000;
+            const noiseGain = audioCtx.createGain();
+            noiseGain.gain.setValueAtTime(0.6, audioCtx.currentTime);
+            noiseGain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.5);
+            
+            noise.connect(noiseFilter);
+            noiseFilter.connect(noiseGain);
+            noiseGain.connect(audioCtx.destination);
+            noise.start();
+        }
+
+        // --- INIT & SIZING ---
+        function resizeCanvas() {
+            const rect = canvas.parentElement.getBoundingClientRect();
+            const dpr = window.devicePixelRatio || 1;
+            canvas.width = rect.width * dpr;
+            canvas.height = rect.height * dpr;
+            ctx.scale(dpr, dpr);
+            canvas.style.width = `${rect.width}px`;
+            canvas.style.height = `${rect.height}px`;
+        }
+
+        window.addEventListener('resize', () => {
+            resizeCanvas();
+            render(); 
+        });
+
+        // --- MATH & HEURISTICS ---
+        function getPointsFromSvgPath(d, numPoints) {
+            svgPathEl.setAttribute('d', d);
+            const length = svgPathEl.getTotalLength();
+            const points = [];
+            for (let i = 0; i < numPoints; i++) {
+                const pt = svgPathEl.getPointAtLength((i / (numPoints - 1)) * length);
+                points.push({ x: pt.x, y: pt.y });
+            }
+            return points;
+        }
+
+        function getPointsFromStroke(strokePoints, numPoints) {
+            if (strokePoints.length === 0) return [];
+            if (strokePoints.length === 1) return Array(numPoints).fill({...strokePoints[0]});
+
+            let totalLength = 0;
+            const distances = [0];
+            for (let i = 1; i < strokePoints.length; i++) {
+                const dx = strokePoints[i].x - strokePoints[i-1].x;
+                const dy = strokePoints[i].y - strokePoints[i-1].y;
+                totalLength += Math.sqrt(dx*dx + dy*dy);
+                distances.push(totalLength);
+            }
+
+            const points = [];
+            for (let i = 0; i < numPoints; i++) {
+                const targetDist = (i / (numPoints - 1)) * totalLength;
+                let idx = 1;
+                while (idx < distances.length && distances[idx] < targetDist) idx++;
+                if (idx >= distances.length) {
+                    points.push({...strokePoints[strokePoints.length - 1]});
+                    continue;
+                }
+                const prevDist = distances[idx - 1];
+                const segmentLength = distances[idx] - prevDist;
+                const t = segmentLength === 0 ? 0 : (targetDist - prevDist) / segmentLength;
+                points.push({
+                    x: strokePoints[idx - 1].x + (strokePoints[idx].x - strokePoints[idx - 1].x) * t,
+                    y: strokePoints[idx - 1].y + (strokePoints[idx].y - strokePoints[idx - 1].y) * t
+                });
+            }
+            return points;
+        }
+
+        function getBoundingBox(points) {
+            let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
+            points.forEach(p => {
+                if (p.x < minX) minX = p.x;
+                if (p.y < minY) minY = p.y;
+                if (p.x > maxX) maxX = p.x;
+                if (p.y > maxY) maxY = p.y;
+            });
+            return { minX, minY, maxX, maxY, width: maxX - minX, height: maxY - minY };
+        }
+
+        function getStrokeLength(pts) {
+            let len = 0;
+            for(let i=1; i<pts.length; i++) {
+                len += Math.hypot(pts[i].x - pts[i-1].x, pts[i].y - pts[i-1].y);
+            }
+            return len;
+        }
+
+        function getStrokeAngle(pts) {
+            return Math.atan2(pts[pts.length-1].y - pts[0].y, pts[pts.length-1].x - pts[0].x);
+        }
+
+        function getAngleDiffDeg(a1, a2) {
+            let diff = Math.abs(a1 - a2) % (Math.PI * 2);
+            if (diff > Math.PI) diff = Math.PI * 2 - diff;
+            return diff * (180 / Math.PI);
+        }
+
+        function calculateRMSDistance(pts1, pts2) {
+            let sumSq1 = 0;
+            for (let i = 0; i < pts1.length; i++) {
+                let minDSq = Infinity;
+                for (let j = 0; j < pts2.length; j++) {
+                    const dx = pts1[i].x - pts2[j].x;
+                    const dy = pts1[i].y - pts2[j].y;
+                    const dSq = dx*dx + dy*dy;
+                    if (dSq < minDSq) minDSq = dSq;
+                }
+                sumSq1 += minDSq;
+            }
+            let rms1 = sumSq1 / pts1.length;
+
+            let sumSq2 = 0;
+            for (let i = 0; i < pts2.length; i++) {
+                let minDSq = Infinity;
+                for (let j = 0; j < pts1.length; j++) {
+                    const dx = pts2[i].x - pts1[j].x;
+                    const dy = pts2[i].y - pts1[j].y;
+                    const dSq = dx*dx + dy*dy;
+                    if (dSq < minDSq) minDSq = dSq;
+                }
+                sumSq2 += minDSq;
+            }
+            let rms2 = sumSq2 / pts2.length;
+
+            return Math.sqrt((rms1 + rms2) / 2);
+        }
+
+        // --- QUEUE & SETTINGS LOGIC ---
+        function shuffleArray(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+            return array;
+        }
+
+        function renderSettings() {
+            const container = document.getElementById('kanji-list-container');
+            container.innerHTML = '';
+            
+            const grades = {};
+            KANJI_DATABASE.forEach(k => {
+                if (!grades[k.grade]) grades[k.grade] = [];
+                grades[k.grade].push(k);
+            });
+
+            Object.keys(grades).sort().forEach(grade => {
+                const groupDiv = document.createElement('div');
+                groupDiv.className = 'mb-6';
+                
+                const headerDiv = document.createElement('div');
+                headerDiv.className = 'flex items-center mb-3 pb-2 border-b border-gray-200';
+                
+                const groupCb = document.createElement('input');
+                groupCb.type = 'checkbox';
+                groupCb.id = `group-cb-${grade}`;
+                groupCb.className = 'w-5 h-5 text-indigo-600 rounded border-gray-300 focus:ring-indigo-500 mr-3 cursor-pointer';
+                
+                const headerLabel = document.createElement('label');
+                headerLabel.htmlFor = `group-cb-${grade}`;
+                headerLabel.className = 'text-lg font-bold text-gray-700 cursor-pointer select-none';
+                headerLabel.textContent = `Grade ${grade}`;
+                
+                headerDiv.appendChild(groupCb);
+                headerDiv.appendChild(headerLabel);
+                groupDiv.appendChild(headerDiv);
+
+                const gridDiv = document.createElement('div');
+                gridDiv.className = 'grid grid-cols-2 gap-3 pl-2';
+
+                grades[grade].forEach(data => {
+                    const itemDiv = document.createElement('div');
+                    itemDiv.className = 'flex items-center';
+                    
+                    const itemCb = document.createElement('input');
+                    itemCb.type = 'checkbox';
+                    itemCb.id = `kanji-cb-${data.kanji}`;
+                    itemCb.className = `item-cb-${grade} w-4 h-4 text-indigo-600 rounded border-gray-300 focus:ring-indigo-500 mr-2 cursor-pointer`;
+                    itemCb.checked = userSelectedKanji.has(data.kanji);
+                    itemCb.dataset.kanji = data.kanji;
+                    
+                    const itemLabel = document.createElement('label');
+                    itemLabel.htmlFor = `kanji-cb-${data.kanji}`;
+                    itemLabel.className = 'text-gray-600 cursor-pointer select-none';
+                    itemLabel.textContent = `${data.kanji} (${data.meaning})`;
+                    
+                    itemDiv.appendChild(itemCb);
+                    itemDiv.appendChild(itemLabel);
+                    gridDiv.appendChild(itemDiv);
+
+                    itemCb.addEventListener('change', (e) => {
+                        if (e.target.checked) userSelectedKanji.add(data.kanji);
+                        else userSelectedKanji.delete(data.kanji);
+                        updateGroupCheckboxState(grade);
+                        deckNeedsReinit = true;
+                        if (storageAvailable) localStorage.setItem('kanjiSelectionPrefs', JSON.stringify(Array.from(userSelectedKanji)));
+                    });
+                });
+
+                groupDiv.appendChild(gridDiv);
+                container.appendChild(groupDiv);
+
+                groupCb.addEventListener('change', (e) => {
+                    const isChecked = e.target.checked;
+                    const childCbs = gridDiv.querySelectorAll(`.item-cb-${grade}`);
+                    childCbs.forEach(cb => {
+                        cb.checked = isChecked;
+                        if (isChecked) userSelectedKanji.add(cb.dataset.kanji);
+                        else userSelectedKanji.delete(cb.dataset.kanji);
+                    });
+                    deckNeedsReinit = true;
+                    if (storageAvailable) localStorage.setItem('kanjiSelectionPrefs', JSON.stringify(Array.from(userSelectedKanji)));
+                });
+
+                updateGroupCheckboxState(grade);
+            });
+        }
+
+        function updateGroupCheckboxState(grade) {
+            const groupCb = document.getElementById(`group-cb-${grade}`);
+            const childCbs = document.querySelectorAll(`.item-cb-${grade}`);
+            if (!groupCb || childCbs.length === 0) return;
+            const allChecked = Array.from(childCbs).every(cb => cb.checked);
+            const someChecked = Array.from(childCbs).some(cb => cb.checked);
+            groupCb.checked = allChecked;
+            groupCb.indeterminate = someChecked && !allChecked;
+        }
+
+        // --- SPACED REPETITION LOGIC (SRS) ---
+        function recordKanjiResult(kanjiChar, passed) {
+            if (!kanjiIntervals[kanjiChar]) {
+                kanjiIntervals[kanjiChar] = MIN_DISTANCE;
+            }
+
+            if (!passed) {
+                // Missed: decrease interval to repeat sooner
+                kanjiIntervals[kanjiChar] = Math.max(MIN_DISTANCE, Math.floor(kanjiIntervals[kanjiChar] * 0.3));
+            } else {
+                // Perfect: increase interval to push it further out
+                kanjiIntervals[kanjiChar] = Math.floor(kanjiIntervals[kanjiChar] * 2.0);
+            }
+
+            if (storageAvailable) {
+                localStorage.setItem('kanjiIntervalsPrefs', JSON.stringify(kanjiIntervals));
+            }
+
+            // Splice it back into the queue based on its new interval
+            // If interval is larger than queue length, it naturally defaults to the front of the queue (0)
+            if (userSelectedKanji.has(kanjiChar)) {
+                let insertDist = kanjiIntervals[kanjiChar];
+                let spliceIndex = Math.max(0, reviewQueue.length - insertDist);
+                reviewQueue.splice(spliceIndex, 0, kanjiChar);
+            }
+        }
+
+        // --- GAME LOGIC ---
+        async function loadNextKanji() {
+            if (userSelectedKanji.size === 0) {
+                promptMeaning.textContent = "No Kanji Selected";
+                expectedStrokes = [];
+                currentStrokeIdx = 0;
+                activeStroke = [];
+                completedStrokes = [];
+                render();
+                return;
+            }
+
+            // Fallback for initial startup
+            if (reviewQueue.length === 0) {
+                reviewQueue = shuffleArray(Array.from(userSelectedKanji));
+            }
+            
+            const nextKanjiChar = reviewQueue.pop();
+            const data = KANJI_DATABASE.find(k => k.kanji === nextKanjiChar);
+            currentKanjiData = data;
+
+            promptMeaning.textContent = "Loading...";
+            currentStrokeIdx = 0;
+            completedStrokes = [];
+            activeStroke = [];
+            morphState = null;
+            failCount = 0;
+            usedHintForKanji = false;
+            isSuccessAnimating = false;
+            confettiParticles = [];
+            expectedStrokes = [];
+            render();
+
+            try {
+                const unicodeStr = data.kanji.charCodeAt(0).toString(16).padStart(5, '0');
+                const url = `https://cdn.jsdelivr.net/gh/KanjiVG/kanjivg@master/kanji/${unicodeStr}.svg`;
+                
+                const response = await fetch(url);
+                if (!response.ok) throw new Error("Failed to fetch SVG");
+                
+                const svgText = await response.text();
+                const parser = new DOMParser();
+                const doc = parser.parseFromString(svgText, "image/svg+xml");
+                
+                const pathEls = doc.querySelectorAll(`g[id^="kvg:StrokePaths"] path`);
+                const paths = Array.from(pathEls).map(el => el.getAttribute('d'));
+                
+                const showEnglish = Math.random() > 0.5;
+                promptMeaning.textContent = showEnglish ? data.meaning : data.hiragana;
+                
+                expectedStrokes = paths.map(path => getPointsFromSvgPath(path, NUM_POINTS));
+                updateProgress();
+                render();
+            } catch (err) {
+                console.error(err);
+                promptMeaning.textContent = "Error loading data!";
+            }
+        }
+
+        function updateProgress() {
+            progressText.textContent = `Stroke ${currentStrokeIdx + 1} / ${expectedStrokes.length}`;
+        }
+
+        function showMessage(msg) {
+            messageArea.textContent = msg;
+            messageArea.classList.remove('opacity-0');
+            setTimeout(() => messageArea.classList.add('opacity-0'), 2500);
+        }
+
+        function triggerError(msg = null) {
+            failCount++;
+            if (failCount >= 3) {
+                usedHintForKanji = true;
+            }
+            strokeColor = "#EF4444"; 
+            isShaking = true;
+            playErrorBeep();
+            if (msg) showMessage(msg);
+            
+            let startTime = performance.now();
+            function shakeAnim(time) {
+                const elapsed = time - startTime;
+                if (elapsed < 300) {
+                    shakeOffset = Math.sin(elapsed * 0.05) * 5 * (1 - elapsed/300);
+                    requestAnimationFrame(shakeAnim);
+                } else {
+                    shakeOffset = 0;
+                    isShaking = false;
+                    activeStroke = []; 
+                    strokeColor = "#374151";
+                }
+            }
+            requestAnimationFrame(shakeAnim);
+        }
+
+        function handleStrokeEnd() {
+            if (activeStroke.length < 5) {
+                activeStroke = []; 
+                return;
+            }
+
+            const userResampled = getPointsFromStroke(activeStroke, NUM_POINTS);
+            const expectedStroke = expectedStrokes[currentStrokeIdx];
+            
+            const uLen = getStrokeLength(userResampled);
+            const eLenOriginal = getStrokeLength(expectedStroke);
+            // Increased from 5 to 12. KanjiVG dots can be up to ~10-12 units long.
+            const isDot = eLenOriginal < 12;
+
+            if (currentStrokeIdx === 0) {
+                // STROKE 1: Normalize to endpoints
+                let scale, offsetX, offsetY;
+                
+                if (isDot) {
+                    const ubb = getBoundingBox(userResampled);
+                    const ebb = getBoundingBox(expectedStroke);
+                    scale = Math.max(ubb.width, ubb.height) / Math.max(ebb.width, ebb.height);
+                    if(scale === 0 || !isFinite(scale)) scale = 1;
+                    offsetX = ubb.minX + ubb.width/2 - (ebb.minX + ebb.width/2) * scale;
+                    offsetY = ubb.minY + ubb.height/2 - (ebb.minY + ebb.height/2) * scale;
+                } else {
+                    const uDist = Math.hypot(userResampled[NUM_POINTS-1].x - userResampled[0].x, userResampled[NUM_POINTS-1].y - userResampled[0].y);
+                    const eDist = Math.hypot(expectedStroke[NUM_POINTS-1].x - expectedStroke[0].x, expectedStroke[NUM_POINTS-1].y - expectedStroke[0].y);
+                    scale = uDist / eDist;
+                    offsetX = userResampled[0].x - expectedStroke[0].x * scale;
+                    offsetY = userResampled[0].y - expectedStroke[0].y * scale;
+                }
+
+                // First, project and SCORE the stroke EXACTLY as the user drew it
+                const tempProjectedRaw = expectedStroke.map(p => ({ x: p.x * scale + offsetX, y: p.y * scale + offsetY }));
+                
+                let dirDeg = getAngleDiffDeg(getStrokeAngle(userResampled), getStrokeAngle(tempProjectedRaw));
+                if (isDot) dirDeg = 0; // Ignore direction for dots
+
+                let rmsPx = calculateRMSDistance(userResampled, tempProjectedRaw);
+                let normalizedRms = rmsPx / scale;
+
+                const passDir = dirDeg <= THRESHOLDS.stroke1.directionDeg;
+                const passRms = normalizedRms <= THRESHOLDS.stroke1.rmsBase;
+
+                if (passDir && passRms) {
+                    // Only reject if it's ridiculously small
+                    if (scale < MIN_SCALE) { 
+                        triggerError("Stroke drawn too small!"); 
+                        return; 
+                    }
+
+                    // Stroke is good! Now, clamp the bounding box so it safely fits inside the canvas
+                    const rect = canvas.getBoundingClientRect();
+                    const padding = 20; // 20px safe zone
+                    
+                    let finalScale = scale;
+                    const maxAllowedScale = Math.min((rect.width - padding * 2) / 109, (rect.height - padding * 2) / 109);
+                    
+                    if (finalScale > maxAllowedScale) {
+                        finalScale = maxAllowedScale; // Clamp scale
+                    }
+
+                    let finalOffsetX = offsetX;
+                    let finalOffsetY = offsetY;
+                    
+                    // Clamp X and Y offsets so the 109x109 frame cannot go off-screen
+                    const maxX = rect.width - padding - (109 * finalScale);
+                    const maxY = rect.height - padding - (109 * finalScale);
+                    
+                    finalOffsetX = Math.max(padding, Math.min(finalOffsetX, maxX));
+                    finalOffsetY = Math.max(padding, Math.min(finalOffsetY, maxY));
+
+                    // Save as the constrained Master Frame
+                    frameScale = finalScale;
+                    frameOffsetX = finalOffsetX;
+                    frameOffsetY = finalOffsetY;
+
+                    // Morph the user's stroke to the CLAMPED final position
+                    const tempProjectedFinal = expectedStroke.map(p => ({ x: p.x * finalScale + finalOffsetX, y: p.y * finalScale + finalOffsetY }));
+                    triggerSuccess(userResampled, tempProjectedFinal); 
+                } else {
+                    triggerError(); // Failed Dir or P&S
+                }
+
+            } else {
+                // STROKES 2+: Project via Master Frame
+                const projectedExpected = expectedStroke.map(p => ({
+                    x: p.x * frameScale + frameOffsetX,
+                    y: p.y * frameScale + frameOffsetY
+                }));
+
+                let dirDeg = getAngleDiffDeg(getStrokeAngle(userResampled), getStrokeAngle(projectedExpected));
+                if (isDot) dirDeg = 0;
+
+                let rmsPx = calculateRMSDistance(userResampled, projectedExpected);
+                let normalizedRms = rmsPx / frameScale; // Normalize subsequent strokes too!
+                
+                let eLenProj = getStrokeLength(projectedExpected);
+                let lenRatio = uLen / eLenProj;
+                if (isDot) lenRatio = 1.0;
+
+                const passDir = dirDeg <= THRESHOLDS.subsequent.directionDeg;
+                const passRms = normalizedRms <= THRESHOLDS.subsequent.rmsBase;
+                
+                // Allow a flat pixel buffer so short strokes aren't overly penalized by strict ratios
+                const minAllowedLen = (eLenProj * THRESHOLDS.subsequent.lengthMin) - THRESHOLDS.subsequent.lengthBufferPx;
+                const maxAllowedLen = (eLenProj * THRESHOLDS.subsequent.lengthMax) + THRESHOLDS.subsequent.lengthBufferPx;
+                const passLen = (uLen >= minAllowedLen && uLen <= maxAllowedLen) || isDot;
+
+                if (passDir && passRms && passLen) {
+                    triggerSuccess(userResampled, projectedExpected);
+                } else {
+                    triggerError();
+                }
+            }
+        }
+
+        function triggerSuccess(userPts, expectedPts) {
+            strokeColor = "#10B981"; 
+            failCount = 0;
+            playSuccessChime();
+
+            morphState = {
+                fromPts: userPts,
+                toPts: expectedPts,
+                progress: 0
+            };
+            activeStroke = [];
+
+            let lastTime = performance.now();
+            function morphAnim(time) {
+                const dt = time - lastTime;
+                lastTime = time;
+                morphState.progress += dt / 300; 
+                
+                if (morphState.progress >= 1) {
+                    completedStrokes.push(expectedPts);
+                    morphState = null;
+                    strokeColor = "#374151";
+                    advanceStroke();
+                } else {
+                    requestAnimationFrame(morphAnim);
+                }
+            }
+            requestAnimationFrame(morphAnim);
+        }
+
+        function triggerFullSuccessAnimation() {
+            isSuccessAnimating = true;
+            playPartyPopper();
+            
+            const rect = canvas.getBoundingClientRect();
+            const padding = 20; 
+            const targetSize = Math.min(rect.width, rect.height) - padding * 2;
+            
+            finalScale = targetSize / 109; 
+            finalOffsetX = (rect.width - (109 * finalScale)) / 2;
+            finalOffsetY = (rect.height - (109 * finalScale)) / 2;
+            
+            confettiParticles = [];
+            const colors = ['#ef4444', '#3b82f6', '#10b981', '#f59e0b', '#8b5cf6', '#ec4899'];
+            
+            completedStrokes.forEach(stroke => {
+                for(let i=0; i<stroke.length; i+=4) {
+                    confettiParticles.push({
+                        x: stroke[i].x,
+                        y: stroke[i].y,
+                        // Slightly increased initial pop to pair with the reduced drag
+                        vx: (Math.random() - 0.5) * 8,
+                        vy: (Math.random() - 0.5) * 8 - 1.5,
+                        color: colors[Math.floor(Math.random() * colors.length)],
+                        size: Math.random() * 6 + 4,
+                        life: 1.0,
+                        decay: Math.random() * 0.003 + 0.001
+                    });
+                }
+            });
+
+            successStartTime = performance.now();
+            setTimeout(() => { if (isSuccessAnimating) loadNextKanji(); }, 3000); 
+        }
+
+        function advanceStroke() {
+            currentStrokeIdx++;
+            if (currentStrokeIdx >= expectedStrokes.length) {
+                // Kanji finished! Score it in the SRS queue.
+                const passed = !usedHintForKanji;
+                recordKanjiResult(currentKanjiData.kanji, passed);
+                
+                if (passed) {
+                    triggerFullSuccessAnimation();
+                } else {
+                    setTimeout(() => { loadNextKanji(); }, 1000);
+                }
+            } else {
+                updateProgress();
+            }
+        }
+
+        // --- INPUT HANDLING ---
+        function getPointerPos(e) {
+            const rect = canvas.getBoundingClientRect();
+            return { x: e.clientX - rect.left, y: e.clientY - rect.top };
+        }
+
+        canvas.addEventListener('pointerdown', (e) => {
+            if (morphState || currentStrokeIdx >= expectedStrokes.length || isSuccessAnimating) return;
+            isDrawing = true;
+            canvas.setPointerCapture(e.pointerId);
+            strokeColor = "#374151"; // Reset color
+            activeStroke = [getPointerPos(e)]; // This clears out the old red failed stroke!
+        });
+
+        canvas.addEventListener('pointermove', (e) => {
+            if (!isDrawing) return;
+            activeStroke.push(getPointerPos(e));
+        });
+
+        canvas.addEventListener('pointerup', (e) => {
+            if (!isDrawing) return;
+            isDrawing = false;
+            canvas.releasePointerCapture(e.pointerId);
+            handleStrokeEnd();
+        });
+
+        document.getElementById('skip-btn').addEventListener('click', () => {
+            if (currentKanjiData) {
+                // Skipping counts as a miss to ensure you see it again soon
+                recordKanjiResult(currentKanjiData.kanji, false);
+            }
+            loadNextKanji();
+        });
+
+        document.getElementById('settings-btn').addEventListener('click', () => {
+            renderSettings();
+            mainView.classList.add('hidden');
+            settingsView.classList.remove('hidden');
+        });
+
+        document.getElementById('close-settings-btn').addEventListener('click', () => {
+            settingsView.classList.add('hidden');
+            mainView.classList.remove('hidden');
+            
+            // Reinitialize the review deck if checkboxes changed
+            if (deckNeedsReinit) {
+                const activeKanji = currentKanjiData ? currentKanjiData.kanji : null;
+                // Shuffle everything except the one currently on the screen
+                reviewQueue = shuffleArray(Array.from(userSelectedKanji).filter(k => k !== activeKanji));
+                deckNeedsReinit = false;
+            }
+
+            if (expectedStrokes.length === 0 || userSelectedKanji.size === 0 || (currentKanjiData && !userSelectedKanji.has(currentKanjiData.kanji))) {
+                loadNextKanji();
+            }
+        });
+
+        // --- RENDER LOOP ---
+        function drawLine(points, color, width = 8, dash = []) {
+            if (points.length < 2) return;
+            ctx.beginPath();
+            ctx.moveTo(points[0].x, points[0].y);
+            for (let i = 1; i < points.length; i++) {
+                const p0 = points[i-1];
+                const p1 = points[i];
+                ctx.quadraticCurveTo(p0.x, p0.y, (p0.x + p1.x) / 2, (p0.y + p1.y) / 2);
+            }
+            ctx.lineTo(points[points.length-1].x, points[points.length-1].y);
+            ctx.strokeStyle = color;
+            ctx.lineWidth = width;
+            ctx.lineCap = 'round';
+            ctx.lineJoin = 'round';
+            ctx.setLineDash(dash);
+            ctx.stroke();
+            ctx.setLineDash([]);
+        }
+
+        function render() {
+            const rect = canvas.getBoundingClientRect();
+            ctx.clearRect(0, 0, rect.width, rect.height);
+
+            ctx.save();
+            if (isShaking) ctx.translate(shakeOffset, 0);
+
+            let drawStrokes = completedStrokes;
+            let drawColor = "#000000";
+
+            if (isSuccessAnimating) {
+                drawColor = "#10B981"; 
+                const elapsed = performance.now() - successStartTime;
+                const t = Math.min(elapsed / 1000, 1); 
+                const easeT = 1 - Math.pow(1 - t, 3); 
+
+                const currScale = frameScale + (finalScale - frameScale) * easeT;
+                const currOffsetX = frameOffsetX + (finalOffsetX - frameOffsetX) * easeT;
+                const currOffsetY = frameOffsetY + (finalOffsetY - frameOffsetY) * easeT;
+
+                drawStrokes = expectedStrokes.map(exp => exp.map(p => ({
+                    x: p.x * currScale + currOffsetX,
+                    y: p.y * currScale + currOffsetY
+                })));
+            }
+
+            drawStrokes.forEach(pts => drawLine(pts, drawColor, 12));
+
+            // Draw Hint - Triggers if failCount >= 3
+            if (failCount >= 3 && !isDrawing && !morphState) {
+                const exp = expectedStrokes[currentStrokeIdx];
+                let hintPts;
+                if (currentStrokeIdx === 0) {
+                    const scale = (rect.width * 0.5) / 109;
+                    const offsetX = (rect.width - 109 * scale) / 2;
+                    const offsetY = (rect.height - 109 * scale) / 2;
+                    hintPts = exp.map(p => ({ x: p.x * scale + offsetX, y: p.y * scale + offsetY }));
+                } else {
+                    hintPts = exp.map(p => ({ x: p.x * frameScale + frameOffsetX, y: p.y * frameScale + frameOffsetY }));
+                }
+                drawLine(hintPts, "rgba(59, 130, 246, 0.4)", 12, [10, 10]); 
+            }
+
+            // Draw active/failed stroke (Stays on screen until next touch)
+            if (activeStroke.length > 0) {
+                drawLine(activeStroke, strokeColor, 12);
+            }
+
+            // Draw Morph
+            if (morphState) {
+                const interpPts = [];
+                const t = 1 - Math.pow(1 - morphState.progress, 3); 
+                for (let i = 0; i < NUM_POINTS; i++) {
+                    interpPts.push({
+                        x: morphState.fromPts[i].x + (morphState.toPts[i].x - morphState.fromPts[i].x) * t,
+                        y: morphState.fromPts[i].y + (morphState.toPts[i].y - morphState.fromPts[i].y) * t
+                    });
+                }
+                drawLine(interpPts, strokeColor, 12);
+            }
+
+            // Draw Confetti
+            if (isSuccessAnimating) {
+                confettiParticles.forEach(p => {
+                    // Reduced air resistance (from 0.96 to 0.985) so they travel further outward
+                    p.vx *= 0.985;
+                    p.vy *= 0.985;
+                    p.x += p.vx;
+                    p.y += p.vy;
+                    // Keep the very soft gravity
+                    p.vy += 0.015; 
+                    p.life -= p.decay;
+                    if (p.life > 0) {
+                        ctx.globalAlpha = Math.max(p.life, 0);
+                        ctx.fillStyle = p.color;
+                        ctx.beginPath();
+                        ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+                        ctx.fill();
+                    }
+                });
+                ctx.globalAlpha = 1.0;
+            }
+
+            ctx.restore();
+            requestAnimationFrame(render);
+        }
+
+        // --- STARTUP ---
+        resizeCanvas();
+        loadNextKanji();
+        requestAnimationFrame(render); 
+
+    </script>
+</body>
+</html>
