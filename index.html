@@ -348,7 +348,6 @@
 
         window.addEventListener('resize', () => {
             resizeCanvas();
-            // Removed manual render() call to avoid multiple animation loops
         });
 
         // --- MATH & HEURISTICS ---
@@ -591,7 +590,6 @@
                 currentStrokeIdx = 0;
                 activeStroke = [];
                 completedStrokes = [];
-                // Removed manual render() call
                 return;
             }
 
@@ -614,7 +612,6 @@
             isSuccessAnimating = false;
             confettiParticles = [];
             expectedStrokes = [];
-            // Removed manual render() call
 
             try {
                 const unicodeStr = data.kanji.charCodeAt(0).toString(16).padStart(5, '0');
@@ -635,7 +632,6 @@
                 
                 expectedStrokes = paths.map(path => getPointsFromSvgPath(path, NUM_POINTS));
                 updateProgress();
-                // Removed manual render() call
             } catch (err) {
                 console.error(err);
                 promptMeaning.textContent = "Error loading data!";
