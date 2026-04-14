@@ -348,6 +348,7 @@
 
         window.addEventListener('resize', () => {
             resizeCanvas();
+            // Removed manual render() call to avoid multiple animation loops
         });
 
         // --- MATH & HEURISTICS ---
@@ -590,6 +591,7 @@
                 currentStrokeIdx = 0;
                 activeStroke = [];
                 completedStrokes = [];
+                // Removed manual render() call
                 return;
             }
 
@@ -612,6 +614,7 @@
             isSuccessAnimating = false;
             confettiParticles = [];
             expectedStrokes = [];
+            // Removed manual render() call
 
             try {
                 const unicodeStr = data.kanji.charCodeAt(0).toString(16).padStart(5, '0');
@@ -632,6 +635,7 @@
                 
                 expectedStrokes = paths.map(path => getPointsFromSvgPath(path, NUM_POINTS));
                 updateProgress();
+                // Removed manual render() call
             } catch (err) {
                 console.error(err);
                 promptMeaning.textContent = "Error loading data!";
@@ -842,9 +846,9 @@
                     confettiParticles.push({
                         x: stroke[i].x,
                         y: stroke[i].y,
-                        // Slightly increased initial pop to pair with the reduced drag
-                        vx: (Math.random() - 0.5) * 8,
-                        vy: (Math.random() - 0.5) * 8 - 1.5,
+                        // Increased initial burst velocity for a punchier pop
+                        vx: (Math.random() - 0.5) * 16,
+                        vy: (Math.random() - 0.5) * 16 - 3,
                         color: colors[Math.floor(Math.random() * colors.length)],
                         size: Math.random() * 6 + 4,
                         life: 1.0,
@@ -1015,13 +1019,13 @@
             // Draw Confetti
             if (isSuccessAnimating) {
                 confettiParticles.forEach(p => {
-                    // Reduced air resistance (from 0.96 to 0.985) so they travel further outward
-                    p.vx *= 0.985;
-                    p.vy *= 0.985;
+                    // Slightly increased drag to catch the faster initial burst
+                    p.vx *= 0.98;
+                    p.vy *= 0.98;
                     p.x += p.vx;
                     p.y += p.vy;
-                    // Keep the very soft gravity
-                    p.vy += 0.015; 
+                    // Increased gravity for a more natural, satisfying fall
+                    p.vy += 0.08; 
                     p.life -= p.decay;
                     if (p.life > 0) {
                         ctx.globalAlpha = Math.max(p.life, 0);
