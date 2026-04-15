@@ -1,7 +1,6 @@
 # Kanji KakiTori : 漢字書き取り
 
-[Try it](https://pnowell.github.io/KakiTori){target=_blank}
-
+[Try it](https://pnowell.github.io/KakiTori)
 ## Overview
 
 KakiTori is a Japanese kanji writing practice app.  There are some hard-coded grade 1 and grade 2 kanji.  It randomly shows either an English meaning or hiragana reading and you attempt to write the kanji in the provided drawing canvas.
