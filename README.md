@@ -1,6 +1,6 @@
 # Kanji KakiTori : 漢字書き取り
 
-[Try it](https://pnowell.github.io/KakiTori)
+[Try it](https://pnowell.github.io/KakiTori){target=_blank}
 
 ## Overview
 
