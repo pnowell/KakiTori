@@ -212,8 +212,8 @@
 `;
 
         const KANJI_DATABASE = RAW_KANJI_DATA.trim().split('\n').map(line => {
-            const [kanji, meaning, hiragana, grade] = line.split('|');
-            return { kanji, meaning, hiragana, grade: parseInt(grade, 10) };
+            const [kanji, meaning, hiragana, lesson] = line.split('|');
+            return { kanji, meaning, hiragana, lesson: parseInt(lesson, 10) };
         });
 
         // --- COMPOSITE SCORING THRESHOLDS (TUNABLE) ---
@@ -507,13 +507,13 @@
             const container = document.getElementById('kanji-list-container');
             container.innerHTML = '';
             
-            const grades = {};
+            const lessons = {};
             KANJI_DATABASE.forEach(k => {
-                if (!grades[k.grade]) grades[k.grade] = [];
-                grades[k.grade].push(k);
+                if (!lessons[k.lesson]) lessons[k.lesson] = [];
+                lessons[k.lesson].push(k);
             });
 
-            Object.keys(grades).sort().forEach(grade => {
+            Object.keys(lessons).sort((a, b) => a - b).forEach(lesson => {
                 const groupDiv = document.createElement('div');
                 groupDiv.className = 'mb-6';
                 
@@ -522,13 +522,13 @@
                 
                 const groupCb = document.createElement('input');
                 groupCb.type = 'checkbox';
-                groupCb.id = `group-cb-${grade}`;
+                groupCb.id = `group-cb-${lesson}`;
                 groupCb.className = 'w-5 h-5 text-indigo-600 rounded border-gray-300 focus:ring-indigo-500 mr-3 cursor-pointer';
                 
                 const headerLabel = document.createElement('label');
-                headerLabel.htmlFor = `group-cb-${grade}`;
+                headerLabel.htmlFor = `group-cb-${lesson}`;
                 headerLabel.className = 'text-lg font-bold text-gray-700 cursor-pointer select-none';
-                headerLabel.textContent = `Grade ${grade}`;
+                headerLabel.textContent = `Lesson ${lesson}`;
                 
                 headerDiv.appendChild(groupCb);
                 headerDiv.appendChild(headerLabel);
@@ -537,14 +537,14 @@
                 const gridDiv = document.createElement('div');
                 gridDiv.className = 'grid grid-cols-2 gap-3 pl-2';
 
-                grades[grade].forEach(data => {
+                lessons[lesson].forEach(data => {
                     const itemDiv = document.createElement('div');
                     itemDiv.className = 'flex items-center';
                     
                     const itemCb = document.createElement('input');
                     itemCb.type = 'checkbox';
                     itemCb.id = `kanji-cb-${data.kanji}`;
-                    itemCb.className = `item-cb-${grade} w-4 h-4 text-indigo-600 rounded border-gray-300 focus:ring-indigo-500 mr-2 cursor-pointer`;
+                    itemCb.className = `item-cb-${lesson} w-4 h-4 text-indigo-600 rounded border-gray-300 focus:ring-indigo-500 mr-2 cursor-pointer`;
                     itemCb.checked = userSelectedKanji.has(data.kanji);
                     itemCb.dataset.kanji = data.kanji;
                     
@@ -560,7 +560,7 @@
                     itemCb.addEventListener('change', (e) => {
                         if (e.target.checked) userSelectedKanji.add(data.kanji);
                         else userSelectedKanji.delete(data.kanji);
-                        updateGroupCheckboxState(grade);
+                        updateGroupCheckboxState(lesson);
                         deckNeedsReinit = true;
                         if (storageAvailable) localStorage.setItem('kanjiSelectionPrefs', JSON.stringify(Array.from(userSelectedKanji)));
                     });
@@ -571,7 +571,7 @@
 
                 groupCb.addEventListener('change', (e) => {
                     const isChecked = e.target.checked;
-                    const childCbs = gridDiv.querySelectorAll(`.item-cb-${grade}`);
+                    const childCbs = gridDiv.querySelectorAll(`.item-cb-${lesson}`);
                     childCbs.forEach(cb => {
                         cb.checked = isChecked;
                         if (isChecked) userSelectedKanji.add(cb.dataset.kanji);
@@ -581,13 +581,13 @@
                     if (storageAvailable) localStorage.setItem('kanjiSelectionPrefs', JSON.stringify(Array.from(userSelectedKanji)));
                 });
 
-                updateGroupCheckboxState(grade);
+                updateGroupCheckboxState(lesson);
             });
         }
 
-        function updateGroupCheckboxState(grade) {
-            const groupCb = document.getElementById(`group-cb-${grade}`);
-            const childCbs = document.querySelectorAll(`.item-cb-${grade}`);
+        function updateGroupCheckboxState(lesson) {
+            const groupCb = document.getElementById(`group-cb-${lesson}`);
+            const childCbs = document.querySelectorAll(`.item-cb-${lesson}`);
             if (!groupCb || childCbs.length === 0) return;
             const allChecked = Array.from(childCbs).every(cb => cb.checked);
             const someChecked = Array.from(childCbs).some(cb => cb.checked);
@@ -653,7 +653,6 @@
             isSuccessAnimating = false;
             confettiParticles = [];
             expectedStrokes = [];
-            // Removed manual render() call
 
             try {
                 const unicodeStr = data.kanji.charCodeAt(0).toString(16).padStart(5, '0');
@@ -674,7 +673,6 @@
                 
                 expectedStrokes = paths.map(path => getPointsFromSvgPath(path, NUM_POINTS));
                 updateProgress();
-                // Removed manual render() call
             } catch (err) {
                 console.error(err);
                 promptMeaning.textContent = "Error loading data!";
@@ -728,7 +726,6 @@
             
             const uLen = getStrokeLength(userResampled);
             const eLenOriginal = getStrokeLength(expectedStroke);
-            // Increased from 5 to 12. KanjiVG dots can be up to ~10-12 units long.
             const isDot = eLenOriginal < 12;
 
             if (currentStrokeIdx === 0) {
