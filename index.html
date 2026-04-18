@@ -70,106 +70,145 @@
     <script>
         // --- DATA: Compact Kanji Dictionary ---
         const RAW_KANJI_DATA = `
-一|One|いち|1
-二|Two|に|1
-三|Three|さん|1
-四|Four|よん|1
-五|Five|ご|1
-六|Six|ろく|1
-七|Seven|なな|1
-八|Eight|はち|1
-九|Nine|きゅう|1
-十|Ten|じゅう|1
-百|Hundred|ひゃく|1
-千|Thousand|せん|1
-上|Above|うえ|1
-下|Below|した|1
-左|Left|ひだり|1
-右|Right|みぎ|1
-中|Inside|なか|1
-大|Large|おお(きい)|1
-小|Small|ちい(さい)|1
-月|Month/Moon|つき|1
-日|Day/Sun|ひ,にち|1
-年|Year|とし,ねん|1
-早|Early|はや(い)|1
-木|Tree|き,もく|1
-林|Woods|はやし|1
-山|Mountain|やま|1
-川|River|かわ|1
-土|Soil|つち|1
-空|Sky|そら|1
-田|Rice field|た(んぼ)|1
-天|Heaven|てん(ごく)|1
-生|Life|い(きる)|1
-花|Flower|はな|1
-草|Grass|くさ|1
-虫|Insect|むし|1
-犬|Dog|いぬ|1
-人|Person|ひと|1
-名|Name|な(まえ)|1
-女|Woman|おんな|1
-男|Man|おとこ|1
-子|Child|こ|1
-目|Eye|め|1
-耳|Ear|みみ|1
-口|Mouth|くち|1
-手|Hand|て|1
-足|Foot|あし|1
-見|See|み(る)|1
-音|Sound|おと|1
-力|Power|ちから|1
-気|Spirit|き(もち)|1
-円|Yen/Circle|えん|1
-入|Enter|はい(る)|1
-出|Exit|で(る)|1
-立|Stand|た(つ)|1
-休|Rest|やす(む)|1
-先|Previous|さき|1
-夕|Evening|ゆう|1
-本|Book|ほん|1
-文|Text|ぶん,も(じ)|1
-字|Character|(も)じ|1
-学|Study (of)|(すう)がく|1
-校|School|(がっ)こう|1
-村|Village|むら|1
-町|Town|まち|1
-森|Forest|もり|1
-正|Correct|ただ(しい)|1
-水|Water|みず|1
-火|Fire|ひ|1
-玉|Jewel,Ball|たま|1
-王|King|おう(さま)|1
-白|White|しろ(い)|1
-竹|Bamboo|たけ|1
-糸|Thread|いと|1
-車|Car|くるま|1
-貝|Shell|かい|1
-赤|Red|あか|1
-走|Run|はし(る)|1
-雨|Rain|あめ(がふる)|1
-青|Blue|あお|1
-金|Gold|きん|1
-何|What|なに|2
-今|Now|いま|2
-春|Spring|はる|2
-夏|Summer|なつ|2
-秋|Autumn|あき|2
-冬|Winter|ふゆ|2
-行|Go|い(く)|2
-来|Come|く(る)|2
-食|Eat|た(べる)|2
-飲|Drink|の(む)|2
-会|Meet|あ(う)|2
-多|Many|おお(い)|2
-少|Few|すく(ない)|2
-古|Old|ふる(い)|2
-新|New|あたら(しい)|2
-高|High|たか(い)|2
-長|Long|なが(い)|2
-広|Wide|ひろ(い)|2
-兄|Older Brother|あに|2
-弟|Younger Brother|おとうと|2
+一|one|イチ;イッ;ひと|3
+二|two|二;ふた|3
+三|three|サン;みっ|3
+四|four|シ;よん;よ;よっ|3
+五|five|ゴ;いつ|3
+六|six|ロク;ロッ;むっ|3
+七|seven|シチ;なな|3
+八|eight|ハチ;ハッ;やっ|3
+九|nine|キュウ;ク;ここの|3
+十|ten|ジュウ;ジュッ;ジッ;とお|3
+百|hundred|ヒャク;ビャク;ピャク|3
+千|thousand|セン;ゼン|3
+万|ten thousand|マン|3
+円|yen;circle|エン;まる|3
+時|time|ジ;とき|3
+日|day;sun|二;ニチ;ニッ;ひ;び;か|4
+本|book;basis|ホン;もと|4
+人|person|ジン;ニン;ひと|4
+月|month;moon|ゲツ;ガツ;つき|4
+火|fire|カ;ひ;び|4
+水|water|スイ;みず|4
+木|tree|モク;き|4
+金|gold;money|キン;かね|4
+土|soil|ド;ト;つち|4
+曜|weekday|ヨウ|4
+上|up|ジョウ;うえ;のぼ|4
+下|down|カ;した;くだ|4
+中|middle|チュウ;ジュウ;なか|4
+半|half|ハン|4
+山|mountain|サン;やま|5
+川|river|かわ;がわ|5
+元|origin|ゲン;ガン;もと|5
+気|spirit|(ゲン)キ|5
+天|heaven|テン(キ)|5
+私|I;private|シ;わたし|5
+今|now|コン;いま|5
+田|rice field|た(んぼ);だ|5
+女|woman|ジョ;おんな|5
+男|man|ダン;おとこ|5
+見|to see|ケン;み(る)|5
+行|to go|コウ;ギョウ;い(く)|5
+食|to eat|ショク;た(べる)|5
+飲|to drink|イン;の(む)|5
+東|east|トウ;ひがし|6
+西|west|セイ;サイ;にし|6
+南|south|ナン;みなみ|6
+北|north|ホク;ホッ;きた|6
+口|mouth|コウ;くち;ぐち|6
+出|to exit|シュッ;シュツ;で(る);だ(す)|6
+右|right|ウ;ユウ;みぎ|6
+左|left|サ;ひだり|6
+分|minute;to divide|フン;ブン;プン;わ(ける)|6
+先|ahead|セン;さき|6
+生|birth|セイ;ショウ;う(まれる)|6
+大|big|ダイ;タイ;おお(きい)|6
+学|leaning|ガク;ガッ;まな(ぶ)|6
+外|outside|ガイ;そと|6
+国|country|コク;ゴク;コッ;くに|6
+京|capital|キョウ|7
+子|child|シ;こ|7
+小|small|ショウ;ちい(さい)|7
+会|to meet|カイ;あ(う)|7
+社|company|シャ;ジャ|7
+父|father|フ;ちち;とう|7
+母|mother|ボ;はは;かあ|7
+高|high|コウ;たか(い)|7
+校|school|(ガッ)コウ|7
+毎|every|マイ|7
+語|word|(タン)ゴ|7
+文|sentence|ブン,も(じ)|7
+帰|to return|キ;かえ(る)|7
+入|to enter|ニュウ;はい(る);い;いり|7
+員|member|イン|8
+新|new|シン;あたら(しい)|8
+聞|to listen|ブン;き(く)|8
+作|to make|サク;つく(る)|8
+仕|to serve|シ(ゴト);つか(える)|8
+事|thing|ジ;し(ごと);こと|8
+電|electricity|デン|8
+車|car|シャ;くるま|8
+休|to rest|キュウ;やす(む)|8
+言|to say|ゲン;い(う);こと|8
+読|to read|ドク;よ(む)|8
+思|to think|シ;おも(う)|8
+次|next|ジ;つぎ|8
+何|what|なに;なん|8
+午|noon|ゴ(ゴ)|9
+後|after|ゴ;あと;うし(ろ)|9
+前|before|ゼン;まえ|9
+名|name|メイ;ミョウ;な(まえ)|9
+白|white|ハク;しろ(い)|9
+雨|rain|ウ;(おお)あめ|9
+書|to write|ショ;か(く)|9
+友|friend|ユウ;とも|9
+間|between|カン;ゲン;あいだ|9
+家|house|カ;いえ;や|9
+話|to speak|ワ;はな(す);はなし|9
+少|few|ショウ;すこ(し);すく(ない)|9
+古|old|コ;ふる(い)|9
+知|to know|チ;し(る)|9
+来|to come|ライ;く(る)|9
+年|year|とし;ねん|100
+早|early|はや(い)|100
+林|woods|はやし|100
+空|sky|そら|100
+花|flower|はな|100
+草|grass|くさ|100
+虫|insect|むし|100
+犬|dog|いぬ|100
+目|eye|め|100
+耳|ear|みみ|100
+手|hand|て|100
+足|foot|あし|100
+音|sound|おと|100
+力|power|ちから|100
+立|stand|た(つ)|100
+夕|evening|ゆう|100
+字|character|(も)じ|100
+村|village|むら|100
+町|town|まち|100
+森|forest|もり|100
+正|correct|ただ(しい)|100
+玉|jewel;ball|たま|100
+王|king|おう(さま)|100
+竹|bamboo|たけ|100
+糸|thread|いと|100
+貝|shell|かい|100
+赤|red|あか|100
+走|run|はし(る)|100
+青|blue|あお|100
+春|spring|はる|100
+夏|summer|なつ|100
+秋|autumn|あき|100
+冬|winter|ふゆ|100
+多|many|おお(い)|100
+長|long|なが(い)|100
+広|wide|ひろ(い)|100
+兄|older brother|あに|100
+弟|younger brother|おとうと|100
 `;
 
         const KANJI_DATABASE = RAW_KANJI_DATA.trim().split('\n').map(line => {
