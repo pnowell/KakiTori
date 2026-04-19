@@ -44,8 +44,8 @@
         <!-- Progress / Controls -->
         <div class="flex justify-between items-center w-full">
             <div id="progress-text" class="text-gray-500 font-medium">Stroke 1 / X</div>
-            <button id="skip-btn" class="px-4 py-2 bg-gray-200 hover:bg-gray-300 rounded-lg text-gray-700 font-medium transition-colors">
-                Skip Kanji
+            <button id="teach-btn" class="px-4 py-2 bg-gray-200 hover:bg-gray-300 rounded-lg text-gray-700 font-medium transition-colors">
+                Teach Me
             </button>
         </div>
         
@@ -62,7 +62,7 @@
                 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
             </button>
         </div>
-        <div id="kanji-list-container" class="flex-1 overflow-y-auto bg-white rounded-xl shadow-sm p-4 space-y-4">
+        <div id="kanji-list-container" class="flex-1 overflow-y-scroll bg-white rounded-xl shadow-sm p-4 space-y-4">
             <!-- Dynamically populated -->
         </div>
     </div>
@@ -286,6 +286,7 @@
         let failCount = 0;
         
         let usedHintForKanji = false;
+        let teachMode = false;
         let isSuccessAnimating = false;
         let confettiParticles = [];
         let finalScale = 1;
@@ -515,27 +516,58 @@
 
             Object.keys(lessons).sort((a, b) => a - b).forEach(lesson => {
                 const groupDiv = document.createElement('div');
-                groupDiv.className = 'mb-6';
+                groupDiv.className = 'mb-4';
                 
                 const headerDiv = document.createElement('div');
-                headerDiv.className = 'flex items-center mb-3 pb-2 border-b border-gray-200';
+                headerDiv.className = 'group flex items-center pb-2 border-b border-gray-200 cursor-pointer';
                 
                 const groupCb = document.createElement('input');
                 groupCb.type = 'checkbox';
                 groupCb.id = `group-cb-${lesson}`;
-                groupCb.className = 'w-5 h-5 text-indigo-600 rounded border-gray-300 focus:ring-indigo-500 mr-3 cursor-pointer';
+                groupCb.className = 'w-5 h-5 text-indigo-600 rounded border-gray-300 focus:ring-indigo-500 mr-3 cursor-pointer flex-shrink-0';
                 
                 const headerLabel = document.createElement('label');
                 headerLabel.htmlFor = `group-cb-${lesson}`;
-                headerLabel.className = 'text-lg font-bold text-gray-700 cursor-pointer select-none';
+                headerLabel.className = 'text-lg font-bold text-gray-700 cursor-pointer select-none whitespace-nowrap flex-shrink-0';
                 headerLabel.textContent = `Lesson ${lesson}`;
+                
+                const kanjiListContainer = document.createElement('div');
+                kanjiListContainer.className = 'flex-1 overflow-hidden mx-2 text-sm text-gray-500 whitespace-nowrap pointer-events-none';
+                kanjiListContainer.style.webkitMaskImage = 'linear-gradient(to right, black 70%, transparent 100%)';
+                kanjiListContainer.style.maskImage = 'linear-gradient(to right, black 70%, transparent 100%)';
+                kanjiListContainer.textContent = `(${lessons[lesson].map(k => k.kanji).join(', ')})`;
+
+                const toggleBtn = document.createElement('button');
+                toggleBtn.className = 'ml-auto text-gray-400 group-hover:text-gray-600 transition-transform flex-shrink-0 pointer-events-none';
+                toggleBtn.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>`;
                 
                 headerDiv.appendChild(groupCb);
                 headerDiv.appendChild(headerLabel);
+                headerDiv.appendChild(kanjiListContainer);
+                headerDiv.appendChild(toggleBtn);
                 groupDiv.appendChild(headerDiv);
 
                 const gridDiv = document.createElement('div');
-                gridDiv.className = 'grid grid-cols-2 gap-3 pl-2';
+                gridDiv.className = 'grid grid-cols-2 gap-3 pl-2 mt-3 hidden';
+
+                let isExpanded = false;
+                function toggleLesson() {
+                    isExpanded = !isExpanded;
+                    if (isExpanded) {
+                        gridDiv.classList.remove('hidden');
+                        kanjiListContainer.classList.add('hidden');
+                        toggleBtn.style.transform = 'rotate(180deg)';
+                    } else {
+                        gridDiv.classList.add('hidden');
+                        kanjiListContainer.classList.remove('hidden');
+                        toggleBtn.style.transform = 'rotate(0deg)';
+                    }
+                }
+
+                headerDiv.addEventListener('click', (e) => {
+                    if (e.target === groupCb || e.target === headerLabel) return;
+                    toggleLesson();
+                });
 
                 lessons[lesson].forEach(data => {
                     const itemDiv = document.createElement('div');
@@ -650,6 +682,7 @@
             morphState = null;
             failCount = 0;
             usedHintForKanji = false;
+            teachMode = false;
             isSuccessAnimating = false;
             confettiParticles = [];
             expectedStrokes = [];
@@ -940,12 +973,15 @@
             handleStrokeEnd();
         });
 
-        document.getElementById('skip-btn').addEventListener('click', () => {
+        document.getElementById('teach-btn').addEventListener('click', () => {
             if (currentKanjiData) {
-                // Skipping counts as a miss to ensure you see it again soon
-                recordKanjiResult(currentKanjiData.kanji, false);
+                kanjiIntervals[currentKanjiData.kanji] = MIN_DISTANCE;
+                if (storageAvailable) {
+                    localStorage.setItem('kanjiIntervalsPrefs', JSON.stringify(kanjiIntervals));
+                }
+                teachMode = true;
+                usedHintForKanji = true;
             }
-            loadNextKanji();
         });
 
         document.getElementById('settings-btn').addEventListener('click', () => {
@@ -1019,8 +1055,8 @@
 
             drawStrokes.forEach(pts => drawLine(pts, drawColor, 12));
 
-            // Draw Hint - Triggers if failCount >= 3
-            if (failCount >= 3 && !isDrawing && !morphState) {
+            // Draw Hint - Triggers if failCount >= 3 or teachMode
+            if ((failCount >= 3 || teachMode) && !isDrawing && !morphState && expectedStrokes[currentStrokeIdx]) {
                 const exp = expectedStrokes[currentStrokeIdx];
                 let hintPts;
                 if (currentStrokeIdx === 0) {
