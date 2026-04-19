@@ -1,16 +1,21 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Kanji Drawing Practice</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        body { touch-action: none; overscroll-behavior: none; }
-        canvas { 
+        body {
+            touch-action: none;
+            overscroll-behavior: none;
+        }
+
+        canvas {
             touch-action: none;
             box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-            background-image: 
+            background-image:
                 linear-gradient(to right, #f0f0f0 1px, transparent 1px),
                 linear-gradient(to bottom, #f0f0f0 1px, transparent 1px),
                 linear-gradient(to right, #e0e0e0 2px, transparent 2px),
@@ -20,14 +25,22 @@
         }
     </style>
 </head>
+
 <body class="bg-gray-100 h-screen w-screen flex flex-col items-center py-8 font-sans overflow-hidden">
 
     <!-- Main View -->
     <div id="main-view" class="w-full max-w-md px-4 flex flex-col items-center h-full">
         <!-- Header / Prompt -->
         <div class="bg-white rounded-2xl shadow-sm p-6 mb-6 w-full text-center relative">
-            <button id="settings-btn" class="absolute top-4 right-4 p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-full transition-colors">
-                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+            <button id="settings-btn"
+                class="absolute top-4 right-4 p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-full transition-colors">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                    stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path
+                        d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z">
+                    </path>
+                    <circle cx="12" cy="12" r="3"></circle>
+                </svg>
             </button>
             <h1 class="text-sm text-gray-500 uppercase tracking-wider font-bold mb-1">Draw the Kanji for:</h1>
             <h2 id="prompt-meaning" class="text-3xl font-extrabold text-indigo-600 mb-1">Loading...</h2>
@@ -36,20 +49,24 @@
         <!-- Canvas Container -->
         <div class="relative w-full aspect-square bg-white rounded-xl mb-6 relative">
             <canvas id="draw-canvas" class="w-full h-full rounded-xl cursor-crosshair"></canvas>
-            
+
             <!-- Hidden SVG for Path Resampling -->
-            <svg id="svg-helper" style="display:none;"><path id="svg-path" d=""/></svg>
+            <svg id="svg-helper" style="display:none;">
+                <path id="svg-path" d="" />
+            </svg>
         </div>
 
         <!-- Progress / Controls -->
         <div class="flex justify-between items-center w-full">
             <div id="progress-text" class="text-gray-500 font-medium">Stroke 1 / X</div>
-            <button id="teach-btn" class="px-4 py-2 bg-gray-200 hover:bg-gray-300 rounded-lg text-gray-700 font-medium transition-colors">
+            <button id="teach-btn"
+                class="px-4 py-2 bg-gray-200 hover:bg-gray-300 rounded-lg text-gray-700 font-medium transition-colors">
                 Teach Me
             </button>
         </div>
-        
-        <div id="message-area" class="mt-4 text-red-500 font-bold h-6 transition-opacity duration-300 opacity-0 text-center">
+
+        <div id="message-area"
+            class="mt-4 text-red-500 font-bold h-6 transition-opacity duration-300 opacity-0 text-center">
             Message Area
         </div>
     </div>
@@ -57,10 +74,24 @@
     <!-- Settings View -->
     <div id="settings-view" class="w-full max-w-md px-4 flex flex-col hidden h-full max-h-screen overflow-hidden pb-8">
         <div class="flex justify-between items-center mb-4 mt-2">
-            <h2 class="text-2xl font-bold text-gray-800">Select Kanji</h2>
-            <button id="close-settings-btn" class="p-2 bg-gray-200 text-gray-700 rounded-full hover:bg-gray-300 transition-colors">
-                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
-            </button>
+            <h2 id="settings-title" class="text-2xl font-bold text-gray-800">Select Kanji</h2>
+            <div id="search-container" class="hidden flex-1 items-center bg-gray-200 rounded-full px-3 py-1.5 mr-2">
+                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-gray-500 mr-2 flex-shrink-0"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+                <input type="text" id="search-input" class="bg-transparent outline-none w-full text-gray-700" placeholder="Search...">
+            </div>
+            <div class="flex items-center space-x-2">
+                <button id="search-toggle-btn" class="p-2 bg-gray-200 text-gray-700 rounded-full hover:bg-gray-300 transition-colors">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+                </button>
+                <button id="close-settings-btn"
+                    class="p-2 bg-gray-200 text-gray-700 rounded-full hover:bg-gray-300 transition-colors">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                        stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="18" y1="6" x2="6" y2="18"></line>
+                        <line x1="6" y1="6" x2="18" y2="18"></line>
+                    </svg>
+                </button>
+            </div>
         </div>
         <div id="kanji-list-container" class="flex-1 overflow-y-scroll bg-white rounded-xl shadow-sm p-4 space-y-4">
             <!-- Dynamically populated -->
@@ -217,20 +248,20 @@
         });
 
         // --- COMPOSITE SCORING THRESHOLDS (TUNABLE) ---
-        const NUM_POINTS = 50; 
-        const MIN_SCALE = 0.8;        
+        const NUM_POINTS = 50;
+        const MIN_SCALE = 0.8;
 
         const THRESHOLDS = {
             stroke1: {
-                directionDeg: 35, 
-                rmsBase: 25       
+                directionDeg: 35,
+                rmsBase: 25
             },
             subsequent: {
-                directionDeg: 30, 
-                rmsBase: 18,      
-                lengthMin: 0.6,   
-                lengthMax: 1.5,   
-                lengthBufferPx: 30 
+                directionDeg: 30,
+                rmsBase: 18,
+                lengthMin: 0.6,
+                lengthMax: 1.5,
+                lengthBufferPx: 30
             }
         };
 
@@ -251,7 +282,8 @@
         // --- STATE ---
         let userSelectedKanji = new Set(KANJI_DATABASE.map(k => k.kanji));
         let kanjiIntervals = {};
-        
+        let kanjiDomElements = {};
+
         if (storageAvailable) {
             const savedPrefs = localStorage.getItem('kanjiSelectionPrefs');
             if (savedPrefs) {
@@ -260,31 +292,31 @@
                     if (Array.isArray(parsed) && parsed.length > 0) {
                         userSelectedKanji = new Set(parsed);
                     }
-                } catch(e) { console.error("Failed to parse saved settings.", e); }
+                } catch (e) { console.error("Failed to parse saved settings.", e); }
             }
 
             const savedIntervals = localStorage.getItem('kanjiIntervalsPrefs');
             if (savedIntervals) {
-                try { kanjiIntervals = JSON.parse(savedIntervals); } 
-                catch(e) { console.error("Failed to parse saved intervals.", e); }
+                try { kanjiIntervals = JSON.parse(savedIntervals); }
+                catch (e) { console.error("Failed to parse saved intervals.", e); }
             }
         }
 
         let reviewQueue = [];
         let currentKanjiData = null;
-        let expectedStrokes = []; 
+        let expectedStrokes = [];
         let currentStrokeIdx = 0;
         let deckNeedsReinit = false;
-        
+
         let frameScale = 1;
         let frameOffsetX = 0;
         let frameOffsetY = 0;
 
-        let completedStrokes = []; 
-        let activeStroke = [];     
-        let morphState = null;     
+        let completedStrokes = [];
+        let activeStroke = [];
+        let morphState = null;
         let failCount = 0;
-        
+
         let usedHintForKanji = false;
         let teachMode = false;
         let isSuccessAnimating = false;
@@ -297,7 +329,7 @@
         let isDrawing = false;
         let isShaking = false;
         let shakeOffset = 0;
-        let strokeColor = "#374151"; 
+        let strokeColor = "#374151";
 
         // --- DOM Elements ---
         const mainView = document.getElementById('main-view');
@@ -354,12 +386,12 @@
             gainNode.connect(audioCtx.destination);
             osc.start();
             osc.stop(audioCtx.currentTime + 0.2);
-            
-            const bufferSize = audioCtx.sampleRate * 0.5; 
+
+            const bufferSize = audioCtx.sampleRate * 0.5;
             const buffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
             const data = buffer.getChannelData(0);
             for (let i = 0; i < bufferSize; i++) data[i] = Math.random() * 2 - 1;
-            
+
             const noise = audioCtx.createBufferSource();
             noise.buffer = buffer;
             const noiseFilter = audioCtx.createBiquadFilter();
@@ -368,7 +400,7 @@
             const noiseGain = audioCtx.createGain();
             noiseGain.gain.setValueAtTime(0.6, audioCtx.currentTime);
             noiseGain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.5);
-            
+
             noise.connect(noiseFilter);
             noiseFilter.connect(noiseGain);
             noiseGain.connect(audioCtx.destination);
@@ -405,14 +437,14 @@
 
         function getPointsFromStroke(strokePoints, numPoints) {
             if (strokePoints.length === 0) return [];
-            if (strokePoints.length === 1) return Array(numPoints).fill({...strokePoints[0]});
+            if (strokePoints.length === 1) return Array(numPoints).fill({ ...strokePoints[0] });
 
             let totalLength = 0;
             const distances = [0];
             for (let i = 1; i < strokePoints.length; i++) {
-                const dx = strokePoints[i].x - strokePoints[i-1].x;
-                const dy = strokePoints[i].y - strokePoints[i-1].y;
-                totalLength += Math.sqrt(dx*dx + dy*dy);
+                const dx = strokePoints[i].x - strokePoints[i - 1].x;
+                const dy = strokePoints[i].y - strokePoints[i - 1].y;
+                totalLength += Math.sqrt(dx * dx + dy * dy);
                 distances.push(totalLength);
             }
 
@@ -422,7 +454,7 @@
                 let idx = 1;
                 while (idx < distances.length && distances[idx] < targetDist) idx++;
                 if (idx >= distances.length) {
-                    points.push({...strokePoints[strokePoints.length - 1]});
+                    points.push({ ...strokePoints[strokePoints.length - 1] });
                     continue;
                 }
                 const prevDist = distances[idx - 1];
@@ -449,14 +481,14 @@
 
         function getStrokeLength(pts) {
             let len = 0;
-            for(let i=1; i<pts.length; i++) {
-                len += Math.hypot(pts[i].x - pts[i-1].x, pts[i].y - pts[i-1].y);
+            for (let i = 1; i < pts.length; i++) {
+                len += Math.hypot(pts[i].x - pts[i - 1].x, pts[i].y - pts[i - 1].y);
             }
             return len;
         }
 
         function getStrokeAngle(pts) {
-            return Math.atan2(pts[pts.length-1].y - pts[0].y, pts[pts.length-1].x - pts[0].x);
+            return Math.atan2(pts[pts.length - 1].y - pts[0].y, pts[pts.length - 1].x - pts[0].x);
         }
 
         function getAngleDiffDeg(a1, a2) {
@@ -472,7 +504,7 @@
                 for (let j = 0; j < pts2.length; j++) {
                     const dx = pts1[i].x - pts2[j].x;
                     const dy = pts1[i].y - pts2[j].y;
-                    const dSq = dx*dx + dy*dy;
+                    const dSq = dx * dx + dy * dy;
                     if (dSq < minDSq) minDSq = dSq;
                 }
                 sumSq1 += minDSq;
@@ -485,7 +517,7 @@
                 for (let j = 0; j < pts1.length; j++) {
                     const dx = pts2[i].x - pts1[j].x;
                     const dy = pts2[i].y - pts1[j].y;
-                    const dSq = dx*dx + dy*dy;
+                    const dSq = dx * dx + dy * dy;
                     if (dSq < minDSq) minDSq = dSq;
                 }
                 sumSq2 += minDSq;
@@ -505,9 +537,10 @@
         }
 
         function renderSettings() {
+            kanjiDomElements = {};
             const container = document.getElementById('kanji-list-container');
             container.innerHTML = '';
-            
+
             const lessons = {};
             KANJI_DATABASE.forEach(k => {
                 if (!lessons[k.lesson]) lessons[k.lesson] = [];
@@ -517,20 +550,20 @@
             Object.keys(lessons).sort((a, b) => a - b).forEach(lesson => {
                 const groupDiv = document.createElement('div');
                 groupDiv.className = 'mb-4';
-                
+
                 const headerDiv = document.createElement('div');
-                headerDiv.className = 'group flex items-center pb-2 border-b border-gray-200 cursor-pointer';
-                
+                headerDiv.className = 'group flex items-center p-3 mb-2 bg-indigo-100 hover:bg-indigo-200 rounded-lg transition-colors cursor-pointer';
+
                 const groupCb = document.createElement('input');
                 groupCb.type = 'checkbox';
                 groupCb.id = `group-cb-${lesson}`;
                 groupCb.className = 'w-5 h-5 text-indigo-600 rounded border-gray-300 focus:ring-indigo-500 mr-3 cursor-pointer flex-shrink-0';
-                
+
                 const headerLabel = document.createElement('label');
                 headerLabel.htmlFor = `group-cb-${lesson}`;
                 headerLabel.className = 'text-lg font-bold text-gray-700 cursor-pointer select-none whitespace-nowrap flex-shrink-0';
                 headerLabel.textContent = `Lesson ${lesson}`;
-                
+
                 const kanjiListContainer = document.createElement('div');
                 kanjiListContainer.className = 'flex-1 overflow-hidden mx-2 text-sm text-gray-500 whitespace-nowrap pointer-events-none';
                 kanjiListContainer.style.webkitMaskImage = 'linear-gradient(to right, black 70%, transparent 100%)';
@@ -540,7 +573,7 @@
                 const toggleBtn = document.createElement('button');
                 toggleBtn.className = 'ml-auto text-gray-400 group-hover:text-gray-600 transition-transform flex-shrink-0 pointer-events-none';
                 toggleBtn.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>`;
-                
+
                 headerDiv.appendChild(groupCb);
                 headerDiv.appendChild(headerLabel);
                 headerDiv.appendChild(kanjiListContainer);
@@ -571,23 +604,30 @@
 
                 lessons[lesson].forEach(data => {
                     const itemDiv = document.createElement('div');
-                    itemDiv.className = 'flex items-center';
-                    
+                    itemDiv.className = 'flex items-center p-1 rounded-md transition-colors';
+
                     const itemCb = document.createElement('input');
                     itemCb.type = 'checkbox';
                     itemCb.id = `kanji-cb-${data.kanji}`;
-                    itemCb.className = `item-cb-${lesson} w-4 h-4 text-indigo-600 rounded border-gray-300 focus:ring-indigo-500 mr-2 cursor-pointer`;
+                    itemCb.className = `item-cb-${lesson} w-4 h-4 text-indigo-600 rounded border-gray-300 focus:ring-indigo-500 mr-2 cursor-pointer flex-shrink-0`;
                     itemCb.checked = userSelectedKanji.has(data.kanji);
                     itemCb.dataset.kanji = data.kanji;
-                    
+
                     const itemLabel = document.createElement('label');
                     itemLabel.htmlFor = `kanji-cb-${data.kanji}`;
                     itemLabel.className = 'text-gray-600 cursor-pointer select-none';
                     itemLabel.textContent = `${data.kanji} (${data.meaning})`;
-                    
+
                     itemDiv.appendChild(itemCb);
                     itemDiv.appendChild(itemLabel);
                     gridDiv.appendChild(itemDiv);
+
+                    kanjiDomElements[data.kanji] = {
+                        itemDiv: itemDiv,
+                        expandLesson: () => {
+                            if (!isExpanded) toggleLesson();
+                        }
+                    };
 
                     itemCb.addEventListener('change', (e) => {
                         if (e.target.checked) userSelectedKanji.add(data.kanji);
@@ -670,7 +710,7 @@
             if (reviewQueue.length === 0) {
                 reviewQueue = shuffleArray(Array.from(userSelectedKanji));
             }
-            
+
             const nextKanjiChar = reviewQueue.pop();
             const data = KANJI_DATABASE.find(k => k.kanji === nextKanjiChar);
             currentKanjiData = data;
@@ -690,20 +730,20 @@
             try {
                 const unicodeStr = data.kanji.charCodeAt(0).toString(16).padStart(5, '0');
                 const url = `https://cdn.jsdelivr.net/gh/KanjiVG/kanjivg@master/kanji/${unicodeStr}.svg`;
-                
+
                 const response = await fetch(url);
                 if (!response.ok) throw new Error("Failed to fetch SVG");
-                
+
                 const svgText = await response.text();
                 const parser = new DOMParser();
                 const doc = parser.parseFromString(svgText, "image/svg+xml");
-                
+
                 const pathEls = doc.querySelectorAll(`g[id^="kvg:StrokePaths"] path`);
                 const paths = Array.from(pathEls).map(el => el.getAttribute('d'));
-                
+
                 const showEnglish = Math.random() > 0.5;
                 promptMeaning.textContent = showEnglish ? data.meaning : data.hiragana;
-                
+
                 expectedStrokes = paths.map(path => getPointsFromSvgPath(path, NUM_POINTS));
                 updateProgress();
             } catch (err) {
@@ -727,21 +767,21 @@
             if (failCount >= 3) {
                 usedHintForKanji = true;
             }
-            strokeColor = "#EF4444"; 
+            strokeColor = "#EF4444";
             isShaking = true;
             playErrorBeep();
             if (msg) showMessage(msg);
-            
+
             let startTime = performance.now();
             function shakeAnim(time) {
                 const elapsed = time - startTime;
                 if (elapsed < 300) {
-                    shakeOffset = Math.sin(elapsed * 0.05) * 5 * (1 - elapsed/300);
+                    shakeOffset = Math.sin(elapsed * 0.05) * 5 * (1 - elapsed / 300);
                     requestAnimationFrame(shakeAnim);
                 } else {
                     shakeOffset = 0;
                     isShaking = false;
-                    activeStroke = []; 
+                    activeStroke = [];
                     strokeColor = "#374151";
                 }
             }
@@ -750,13 +790,13 @@
 
         function handleStrokeEnd() {
             if (activeStroke.length < 5) {
-                activeStroke = []; 
+                activeStroke = [];
                 return;
             }
 
             const userResampled = getPointsFromStroke(activeStroke, NUM_POINTS);
             const expectedStroke = expectedStrokes[currentStrokeIdx];
-            
+
             const uLen = getStrokeLength(userResampled);
             const eLenOriginal = getStrokeLength(expectedStroke);
             const isDot = eLenOriginal < 12;
@@ -764,17 +804,17 @@
             if (currentStrokeIdx === 0) {
                 // STROKE 1: Normalize to endpoints
                 let scale, offsetX, offsetY;
-                
+
                 if (isDot) {
                     const ubb = getBoundingBox(userResampled);
                     const ebb = getBoundingBox(expectedStroke);
                     scale = Math.max(ubb.width, ubb.height) / Math.max(ebb.width, ebb.height);
-                    if(scale === 0 || !isFinite(scale)) scale = 1;
-                    offsetX = ubb.minX + ubb.width/2 - (ebb.minX + ebb.width/2) * scale;
-                    offsetY = ubb.minY + ubb.height/2 - (ebb.minY + ebb.height/2) * scale;
+                    if (scale === 0 || !isFinite(scale)) scale = 1;
+                    offsetX = ubb.minX + ubb.width / 2 - (ebb.minX + ebb.width / 2) * scale;
+                    offsetY = ubb.minY + ubb.height / 2 - (ebb.minY + ebb.height / 2) * scale;
                 } else {
-                    const uDist = Math.hypot(userResampled[NUM_POINTS-1].x - userResampled[0].x, userResampled[NUM_POINTS-1].y - userResampled[0].y);
-                    const eDist = Math.hypot(expectedStroke[NUM_POINTS-1].x - expectedStroke[0].x, expectedStroke[NUM_POINTS-1].y - expectedStroke[0].y);
+                    const uDist = Math.hypot(userResampled[NUM_POINTS - 1].x - userResampled[0].x, userResampled[NUM_POINTS - 1].y - userResampled[0].y);
+                    const eDist = Math.hypot(expectedStroke[NUM_POINTS - 1].x - expectedStroke[0].x, expectedStroke[NUM_POINTS - 1].y - expectedStroke[0].y);
                     scale = uDist / eDist;
                     offsetX = userResampled[0].x - expectedStroke[0].x * scale;
                     offsetY = userResampled[0].y - expectedStroke[0].y * scale;
@@ -782,7 +822,7 @@
 
                 // First, project and SCORE the stroke EXACTLY as the user drew it
                 const tempProjectedRaw = expectedStroke.map(p => ({ x: p.x * scale + offsetX, y: p.y * scale + offsetY }));
-                
+
                 let dirDeg = getAngleDiffDeg(getStrokeAngle(userResampled), getStrokeAngle(tempProjectedRaw));
                 if (isDot) dirDeg = 0; // Ignore direction for dots
 
@@ -794,29 +834,29 @@
 
                 if (passDir && passRms) {
                     // Only reject if it's ridiculously small
-                    if (scale < MIN_SCALE) { 
-                        triggerError("Stroke drawn too small!"); 
-                        return; 
+                    if (scale < MIN_SCALE) {
+                        triggerError("Stroke drawn too small!");
+                        return;
                     }
 
                     // Stroke is good! Now, clamp the bounding box so it safely fits inside the canvas
                     const rect = canvas.getBoundingClientRect();
                     const padding = 20; // 20px safe zone
-                    
+
                     let finalScale = scale;
                     const maxAllowedScale = Math.min((rect.width - padding * 2) / 109, (rect.height - padding * 2) / 109);
-                    
+
                     if (finalScale > maxAllowedScale) {
                         finalScale = maxAllowedScale; // Clamp scale
                     }
 
                     let finalOffsetX = offsetX;
                     let finalOffsetY = offsetY;
-                    
+
                     // Clamp X and Y offsets so the 109x109 frame cannot go off-screen
                     const maxX = rect.width - padding - (109 * finalScale);
                     const maxY = rect.height - padding - (109 * finalScale);
-                    
+
                     finalOffsetX = Math.max(padding, Math.min(finalOffsetX, maxX));
                     finalOffsetY = Math.max(padding, Math.min(finalOffsetY, maxY));
 
@@ -827,7 +867,7 @@
 
                     // Morph the user's stroke to the CLAMPED final position
                     const tempProjectedFinal = expectedStroke.map(p => ({ x: p.x * finalScale + finalOffsetX, y: p.y * finalScale + finalOffsetY }));
-                    triggerSuccess(userResampled, tempProjectedFinal); 
+                    triggerSuccess(userResampled, tempProjectedFinal);
                 } else {
                     triggerError(); // Failed Dir or P&S
                 }
@@ -844,14 +884,14 @@
 
                 let rmsPx = calculateRMSDistance(userResampled, projectedExpected);
                 let normalizedRms = rmsPx / frameScale; // Normalize subsequent strokes too!
-                
+
                 let eLenProj = getStrokeLength(projectedExpected);
                 let lenRatio = uLen / eLenProj;
                 if (isDot) lenRatio = 1.0;
 
                 const passDir = dirDeg <= THRESHOLDS.subsequent.directionDeg;
                 const passRms = normalizedRms <= THRESHOLDS.subsequent.rmsBase;
-                
+
                 // Allow a flat pixel buffer so short strokes aren't overly penalized by strict ratios
                 const minAllowedLen = (eLenProj * THRESHOLDS.subsequent.lengthMin) - THRESHOLDS.subsequent.lengthBufferPx;
                 const maxAllowedLen = (eLenProj * THRESHOLDS.subsequent.lengthMax) + THRESHOLDS.subsequent.lengthBufferPx;
@@ -866,7 +906,7 @@
         }
 
         function triggerSuccess(userPts, expectedPts) {
-            strokeColor = "#10B981"; 
+            strokeColor = "#10B981";
             failCount = 0;
             playSuccessChime();
 
@@ -881,8 +921,8 @@
             function morphAnim(time) {
                 const dt = time - lastTime;
                 lastTime = time;
-                morphState.progress += dt / 300; 
-                
+                morphState.progress += dt / 300;
+
                 if (morphState.progress >= 1) {
                     completedStrokes.push(expectedPts);
                     morphState = null;
@@ -898,20 +938,20 @@
         function triggerFullSuccessAnimation() {
             isSuccessAnimating = true;
             playPartyPopper();
-            
+
             const rect = canvas.getBoundingClientRect();
-            const padding = 20; 
+            const padding = 20;
             const targetSize = Math.min(rect.width, rect.height) - padding * 2;
-            
-            finalScale = targetSize / 109; 
+
+            finalScale = targetSize / 109;
             finalOffsetX = (rect.width - (109 * finalScale)) / 2;
             finalOffsetY = (rect.height - (109 * finalScale)) / 2;
-            
+
             confettiParticles = [];
             const colors = ['#ef4444', '#3b82f6', '#10b981', '#f59e0b', '#8b5cf6', '#ec4899'];
-            
+
             completedStrokes.forEach(stroke => {
-                for(let i=0; i<stroke.length; i+=4) {
+                for (let i = 0; i < stroke.length; i += 4) {
                     confettiParticles.push({
                         x: stroke[i].x,
                         y: stroke[i].y,
@@ -927,7 +967,7 @@
             });
 
             successStartTime = performance.now();
-            setTimeout(() => { if (isSuccessAnimating) loadNextKanji(); }, 3000); 
+            setTimeout(() => { if (isSuccessAnimating) loadNextKanji(); }, 3000);
         }
 
         function advanceStroke() {
@@ -936,7 +976,7 @@
                 // Kanji finished! Score it in the SRS queue.
                 const passed = !usedHintForKanji;
                 recordKanjiResult(currentKanjiData.kanji, passed);
-                
+
                 if (passed) {
                     triggerFullSuccessAnimation();
                 } else {
@@ -984,16 +1024,84 @@
             }
         });
 
+        // --- SEARCH LOGIC ---
+        let isSearchActive = false;
+        const searchToggleBtn = document.getElementById('search-toggle-btn');
+        const searchContainer = document.getElementById('search-container');
+        const settingsTitle = document.getElementById('settings-title');
+        const searchInput = document.getElementById('search-input');
+
+        searchToggleBtn.addEventListener('click', () => {
+            isSearchActive = !isSearchActive;
+            if (isSearchActive) {
+                settingsTitle.classList.add('hidden');
+                searchContainer.classList.remove('hidden');
+                searchContainer.classList.add('flex');
+                searchInput.focus();
+            } else {
+                settingsTitle.classList.remove('hidden');
+                searchContainer.classList.add('hidden');
+                searchContainer.classList.remove('flex');
+                searchInput.value = '';
+                clearSearch();
+            }
+        });
+
+        searchInput.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') {
+                executeSearch(searchInput.value.trim().toLowerCase());
+            }
+        });
+
+        function clearSearch() {
+            Object.values(kanjiDomElements).forEach(dom => {
+                dom.itemDiv.classList.remove('bg-yellow-200');
+            });
+        }
+
+        function executeSearch(query) {
+            clearSearch();
+            if (!query) return;
+
+            let firstMatch = null;
+            KANJI_DATABASE.forEach(data => {
+                const dom = kanjiDomElements[data.kanji];
+                if (!dom) return;
+
+                const matches = data.kanji.includes(query) || 
+                                data.meaning.toLowerCase().includes(query) || 
+                                data.hiragana.includes(query);
+                
+                if (matches) {
+                    dom.itemDiv.classList.add('bg-yellow-200');
+                    dom.expandLesson();
+                    if (!firstMatch) firstMatch = dom.itemDiv;
+                }
+            });
+
+            if (firstMatch) {
+                firstMatch.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }
+        }
+
         document.getElementById('settings-btn').addEventListener('click', () => {
             renderSettings();
             mainView.classList.add('hidden');
             settingsView.classList.remove('hidden');
+
+            if (isSearchActive) {
+                isSearchActive = false;
+                settingsTitle.classList.remove('hidden');
+                searchContainer.classList.add('hidden');
+                searchContainer.classList.remove('flex');
+                searchInput.value = '';
+            }
         });
 
         document.getElementById('close-settings-btn').addEventListener('click', () => {
             settingsView.classList.add('hidden');
             mainView.classList.remove('hidden');
-            
+
             // Reinitialize the review deck if checkboxes changed
             if (deckNeedsReinit) {
                 const activeKanji = currentKanjiData ? currentKanjiData.kanji : null;
@@ -1013,11 +1121,11 @@
             ctx.beginPath();
             ctx.moveTo(points[0].x, points[0].y);
             for (let i = 1; i < points.length; i++) {
-                const p0 = points[i-1];
+                const p0 = points[i - 1];
                 const p1 = points[i];
                 ctx.quadraticCurveTo(p0.x, p0.y, (p0.x + p1.x) / 2, (p0.y + p1.y) / 2);
             }
-            ctx.lineTo(points[points.length-1].x, points[points.length-1].y);
+            ctx.lineTo(points[points.length - 1].x, points[points.length - 1].y);
             ctx.strokeStyle = color;
             ctx.lineWidth = width;
             ctx.lineCap = 'round';
@@ -1038,10 +1146,10 @@
             let drawColor = "#000000";
 
             if (isSuccessAnimating) {
-                drawColor = "#10B981"; 
+                drawColor = "#10B981";
                 const elapsed = performance.now() - successStartTime;
-                const t = Math.min(elapsed / 1000, 1); 
-                const easeT = 1 - Math.pow(1 - t, 3); 
+                const t = Math.min(elapsed / 1000, 1);
+                const easeT = 1 - Math.pow(1 - t, 3);
 
                 const currScale = frameScale + (finalScale - frameScale) * easeT;
                 const currOffsetX = frameOffsetX + (finalOffsetX - frameOffsetX) * easeT;
@@ -1067,7 +1175,7 @@
                 } else {
                     hintPts = exp.map(p => ({ x: p.x * frameScale + frameOffsetX, y: p.y * frameScale + frameOffsetY }));
                 }
-                drawLine(hintPts, "rgba(59, 130, 246, 0.4)", 12, [10, 10]); 
+                drawLine(hintPts, "rgba(59, 130, 246, 0.4)", 12, [10, 10]);
             }
 
             // Draw active/failed stroke (Stays on screen until next touch)
@@ -1078,7 +1186,7 @@
             // Draw Morph
             if (morphState) {
                 const interpPts = [];
-                const t = 1 - Math.pow(1 - morphState.progress, 3); 
+                const t = 1 - Math.pow(1 - morphState.progress, 3);
                 for (let i = 0; i < NUM_POINTS; i++) {
                     interpPts.push({
                         x: morphState.fromPts[i].x + (morphState.toPts[i].x - morphState.fromPts[i].x) * t,
@@ -1097,7 +1205,7 @@
                     p.x += p.vx;
                     p.y += p.vy;
                     // Increased gravity for a more natural, satisfying fall
-                    p.vy += 0.08; 
+                    p.vy += 0.08;
                     p.life -= p.decay;
                     if (p.life > 0) {
                         ctx.globalAlpha = Math.max(p.life, 0);
@@ -1117,8 +1225,9 @@
         // --- STARTUP ---
         resizeCanvas();
         loadNextKanji();
-        requestAnimationFrame(render); 
+        requestAnimationFrame(render);
 
     </script>
 </body>
+
 </html>
