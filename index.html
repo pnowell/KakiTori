@@ -796,6 +796,15 @@
             confettiParticles = [];
             expectedStrokes = [];
 
+            // Pre-initialize the target scale to the "zoomed in" bounds
+            // so Teach Me has a sensible default before any user strokes
+            const rect = canvas.getBoundingClientRect();
+            const padding = 20;
+            const targetSize = Math.min(rect.width, rect.height) - padding * 2;
+            frameScale = targetSize / 109;
+            frameOffsetX = (rect.width - (109 * frameScale)) / 2;
+            frameOffsetY = (rect.height - (109 * frameScale)) / 2;
+
             try {
                 const unicodeStr = data.kanji.charCodeAt(0).toString(16).padStart(5, '0');
                 const url = `https://cdn.jsdelivr.net/gh/KanjiVG/kanjivg@master/kanji/${unicodeStr}.svg`;
@@ -877,7 +886,7 @@
             const eLenOriginal = getStrokeLength(expectedStroke);
             const isDot = eLenOriginal < 12;
 
-            if (currentStrokeIdx === 0) {
+            if (currentStrokeIdx === 0 && !teachMode) {
                 // STROKE 1: Normalize to endpoints
                 let scale, offsetX, offsetY;
 
@@ -1011,9 +1020,9 @@
             requestAnimationFrame(morphAnim);
         }
 
-        function triggerFullSuccessAnimation() {
+        function triggerFullSuccessAnimation(isPassed = true) {
             isSuccessAnimating = true;
-            playPartyPopper();
+            if (isPassed) playPartyPopper();
 
             const rect = canvas.getBoundingClientRect();
             const padding = 20;
@@ -1024,26 +1033,28 @@
             finalOffsetY = (rect.height - (109 * finalScale)) / 2;
 
             confettiParticles = [];
-            const colors = ['#ef4444', '#3b82f6', '#10b981', '#f59e0b', '#8b5cf6', '#ec4899'];
+            if (isPassed) {
+                const colors = ['#ef4444', '#3b82f6', '#10b981', '#f59e0b', '#8b5cf6', '#ec4899'];
 
-            completedStrokes.forEach(stroke => {
-                for (let i = 0; i < stroke.length; i += 4) {
-                    confettiParticles.push({
-                        x: stroke[i].x,
-                        y: stroke[i].y,
-                        // Increased initial burst velocity for a punchier pop
-                        vx: (Math.random() - 0.5) * 16,
-                        vy: (Math.random() - 0.5) * 16 - 3,
-                        color: colors[Math.floor(Math.random() * colors.length)],
-                        size: Math.random() * 6 + 4,
-                        life: 1.0,
-                        decay: Math.random() * 0.003 + 0.001
-                    });
-                }
-            });
+                completedStrokes.forEach(stroke => {
+                    for (let i = 0; i < stroke.length; i += 4) {
+                        confettiParticles.push({
+                            x: stroke[i].x,
+                            y: stroke[i].y,
+                            // Increased initial burst velocity for a punchier pop
+                            vx: (Math.random() - 0.5) * 16,
+                            vy: (Math.random() - 0.5) * 16 - 3,
+                            color: colors[Math.floor(Math.random() * colors.length)],
+                            size: Math.random() * 6 + 4,
+                            life: 1.0,
+                            decay: Math.random() * 0.003 + 0.001
+                        });
+                    }
+                });
+            }
 
             successStartTime = performance.now();
-            setTimeout(() => { if (isSuccessAnimating) loadNextKanji(); }, 3000);
+            setTimeout(() => { if (isSuccessAnimating) loadNextKanji(); }, isPassed ? 3000 : 1500);
         }
 
         function advanceStroke() {
@@ -1053,11 +1064,7 @@
                 const passed = !usedHintForKanji;
                 recordKanjiResult(currentKanjiData.kanji, passed);
 
-                if (passed) {
-                    triggerFullSuccessAnimation();
-                } else {
-                    setTimeout(() => { loadNextKanji(); }, 1000);
-                }
+                triggerFullSuccessAnimation(passed);
             } else {
                 updateProgress();
             }
@@ -1242,15 +1249,7 @@
             // Draw Hint - Triggers if failCount >= 3 or teachMode
             if ((failCount >= 3 || teachMode) && !isDrawing && !morphState && expectedStrokes[currentStrokeIdx]) {
                 const exp = expectedStrokes[currentStrokeIdx];
-                let hintPts;
-                if (currentStrokeIdx === 0) {
-                    const scale = (rect.width * 0.5) / 109;
-                    const offsetX = (rect.width - 109 * scale) / 2;
-                    const offsetY = (rect.height - 109 * scale) / 2;
-                    hintPts = exp.map(p => ({ x: p.x * scale + offsetX, y: p.y * scale + offsetY }));
-                } else {
-                    hintPts = exp.map(p => ({ x: p.x * frameScale + frameOffsetX, y: p.y * frameScale + frameOffsetY }));
-                }
+                const hintPts = exp.map(p => ({ x: p.x * frameScale + frameOffsetX, y: p.y * frameScale + frameOffsetY }));
                 drawLine(hintPts, "rgba(59, 130, 246, 0.4)", 12, [10, 10]);
             }
 
