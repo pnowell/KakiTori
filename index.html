@@ -157,10 +157,6 @@
 半|half|ハン|4|0
 山|mountain|サン; やま|5|0
 川|river|かわ; がわ|5|0
-林|woods|リン; はやし|5|1
-森|forest|シン; もり|5|1
-石|stone|セキ; コク; いし|5|1
-竹|bamboo|チク; たけ|5|1
 元|origin|ゲン; ガン; もと|5|0
 気|spirit|(ゲン)キ|5|0
 天|heaven|テン(キ)|5|0
@@ -173,6 +169,10 @@
 行|to go|コウ; ギョウ; い(く)|5|0
 食|to eat|ショク; た(べる)|5|0
 飲|to drink|イン; の(む)|5|0
+林|woods|リン; はやし|5|1
+森|forest|シン; もり|5|1
+石|stone|セキ; コク; いし|5|1
+竹|bamboo|チク; たけ|5|1
 東|east|トウ; ひがし|6|0
 西|west|セイ; サイ; にし|6|0
 南|south|ナン; みなみ|6|0
@@ -190,6 +190,7 @@
 国|country|コク; ゴク; コッ; くに|6|0
 王|king|オウ|6|1
 玉|jewel; ball|ギョク; たま|6|1
+耳|ear|ジ; ニ; みみ|6|1
 京|capital|キョウ|7|0
 子|child|シ; こ(ども)|7|0
 小|small|ショウ; ちい(さい)|7|0
@@ -239,7 +240,6 @@
 売|to sell|バイ; う(る)|10|0
 買|to buy|バイ; か(う)|10|0
 町|town|チョウ; まち|10|0
-村|village|ソン; むら|10|1
 長|long|チョウ; なが(い)|10|0
 道|way|ドウ; みち|10|0
 雪|snow|セツ; ゆき|10|0
@@ -248,9 +248,9 @@
 夜|night|ヤ; よる; よ|10|0
 朝|morning|チョウ; あさ|10|0
 持|to hold|ジ; も(つ)|10|0
+村|village|ソン; むら|10|1
 手|hand|シュ; て|11|0
 紙|paper|シ; かみ; がみ|11|0
-糸|thread|シ; いと|11|1
 好|favorite; to like|コウ; す(き); この(む)|11|0
 近|near|キン; ちか(い)|11|0
 明|bright|メイ; あか(るい)|11|0
@@ -265,13 +265,13 @@
 強|strong|キョウ; ゴウ; つよ(い)|11|0
 有|to exist|ユウ; あ(る)|11|0
 旅|travel|リョ; たび|11|0
+糸|thread|シ; いと|11|1
 昔|old times|ムカシ|12|0
 々|(repeat symbol)||12|0
 神|god|シン; ジン; コウ; かみ|12|0
 早|early|ソウ; はや(い)|12|0
 起|to get up|キ; お(きる)|12|0
 牛|cow|ギュウ; うし|12|0
-虫|insect|チュウ; むし|12|1
 使|to use|シ; つか(う)|12|0
 働|to work|ドウ; はたら(く); ばたら|12|0
 連|to link|レン; つ(れる)|12|0
@@ -280,6 +280,9 @@
 赤|red|セキ; あか(い)|12|0
 青|blue|セイ; あお(い)|12|0
 色|color|シキ; ショク; いろ|12|0
+虫|insect|チュウ; むし|12|1
+貝|shellfish|バイ; かい|12|1
+草|grass|ソウ; くさ|12|1
 物|thing|ブツ; もの|13|0
 鳥|bird|チョウ; とり|13|0
 料|ingredients; fare|リョウ(リ)|13|0
@@ -318,7 +321,6 @@
 注|to pour; to shed|チュウ; そそ(ぐ)|15|0
 夏|summer|カ; なつ|15|0
 魚|fish|ギョ; さかな; うお|15|0
-貝|shellfish|バイ; かい|15|1
 寺|temple|ジ; てら; でら|15|0
 広|spacious; wide|コウ; ひろ(い)|15|0
 転|to roll over|テン; ころ(ぶ)|15|0
@@ -361,7 +363,6 @@
 歩|to walk|ホ; ポ; ある(く)|17|0
 野|field|ヤ; の|17|0
 目|eye|モク; め|18|0
-耳|ear|ジ; ニ; みみ|18|1
 的|target; -ish|テキ; まと|18|0
 力|power|リョク; リキ; ちから|18|0
 洋|ocean; overseas|ヨウ(フク)|18|0
@@ -381,7 +382,6 @@
 秋|autumn|シュウ; あき|19|0
 冬|winter|トウ; ふゆ|19|0
 花|flower|カ; はな; ばな|19|0
-草|grass|ソウ; くさ|19|1
 様|Mr.; Ms.; condition|ヨウ; さま|19|0
 不|negative; non-|フ; ブ|19|0
 姉|older sister|シ; あね; ねえ|19|0
@@ -459,10 +459,10 @@
 
         const KANJI_DATABASE = RAW_KANJI_DATA.trim().split('\n').map(line => {
             const [kanji, meaning, hiragana, lesson, bonus] = line.split('|');
-            return { 
-                kanji, 
-                meaning, 
-                hiragana, 
+            return {
+                kanji,
+                meaning,
+                hiragana,
                 lesson: parseInt(lesson, 10),
                 isBonus: parseInt(bonus, 10) === 1
             };
@@ -764,11 +764,19 @@
 
             const lessons = {};
             KANJI_DATABASE.forEach(k => {
-                if (!lessons[k.lesson]) lessons[k.lesson] = [];
-                lessons[k.lesson].push(k);
+                const lessonId = k.isBonus ? `${k.lesson}b` : `${k.lesson}`;
+                if (!lessons[lessonId]) lessons[lessonId] = [];
+                lessons[lessonId].push(k);
             });
 
-            Object.keys(lessons).sort((a, b) => a - b).forEach(lesson => {
+            Object.keys(lessons).sort((a, b) => {
+                const numA = parseInt(a);
+                const numB = parseInt(b);
+                if (numA !== numB) return numA - numB;
+                if (a.endsWith('b') && !b.endsWith('b')) return 1;
+                if (!a.endsWith('b') && b.endsWith('b')) return -1;
+                return 0;
+            }).forEach(lesson => {
                 const groupDiv = document.createElement('div');
                 groupDiv.className = 'mb-4';
 
