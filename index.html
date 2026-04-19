@@ -126,360 +126,346 @@
     <script>
         // --- DATA: Compact Kanji Dictionary ---
         const RAW_KANJI_DATA = `
-一|one|イチ; イッ;ひと(つ)|3
-二|two|二; ふた|3
-三|three|サン; みっ|3
-四|four|シ; よん; よ; よっ|3
-五|five|ゴ; いつ|3
-六|six|ロク; ロッ; むっ|3
-七|seven|シチ; なな|3
-八|eight|ハチ; ハッ; やっ|3
-九|nine|キュウ; ク; ここの|3
-十|ten|ジュウ; ジュッ; ジッ; とお|3
-百|hundred|ヒャク; ビャク; ピャク|3
-千|thousand|セン; ゼン|3
-万|ten thousand|マン|3
-円|yen; circle|エン; まる|3
-時|time|ジ; とき|3
-日|day; sun|二; ニチ; ニッ; ひ; び; か|4
-本|book; basis|ホン; もと|4
-人|person|ジン; ニン; ひと|4
-月|month; moon|ゲツ; ガツ; つき|4
-火|fire|カ; ひ; び|4
-水|water|スイ; みず|4
-木|tree|モク; き|4
-金|gold; money|キン; かね|4
-土|soil|ド; ト; つち|4
-曜|weekday|ヨウ|4
-上|up|ジョウ; うえ; のぼ|4
-下|down|カ; した; くだ|4
-中|middle|チュウ; ジュウ; なか|4
-半|half|ハン|4
-山|mountain|サン; やま|5
-川|river|かわ; がわ|5
-元|origin|ゲン; ガン; もと|5
-気|spirit|(ゲン)キ|5
-天|heaven|テン(キ)|5
-私|I; private|シ; わたし|5
-今|now|コン; いま|5
-田|rice field|た(んぼ); だ|5
-女|woman|ジョ; おんな|5
-男|man|ダン; おとこ|5
-見|to see|ケン; み(る)|5
-行|to go|コウ; ギョウ; い(く)|5
-食|to eat|ショク; た(べる)|5
-飲|to drink|イン; の(む)|5
-東|east|トウ; ひがし|6
-西|west|セイ; サイ; にし|6
-南|south|ナン; みなみ|6
-北|north|ホク; ホッ; きた|6
-口|mouth|コウ; くち; ぐち|6
-出|to exit|シュッ; シュツ; で(る); だ(す)|6
-右|right|ウ; ユウ; みぎ|6
-左|left|サ; ひだり|6
-分|minute; to divide|フン; ブン; プン; わ(ける)|6
-先|ahead|セン; さき|6
-生|birth|セイ; ショウ; う(まれる)|6
-大|big|ダイ; タイ; おお(きい)|6
-学|leaning|ガク; ガッ; まな(ぶ)|6
-外|outside|ガイ; そと|6
-国|country|コク; ゴク; コッ; くに|6
-京|capital|キョウ|7
-子|child|シ; こ(ども)|7
-小|small|ショウ; ちい(さい)|7
-会|to meet|カイ; あ(う)|7
-社|company|シャ; ジャ|7
-父|father|フ; ちち; とう|7
-母|mother|ボ; はは; かあ|7
-高|high|コウ; たか(い)|7
-校|school|(ガッ)コウ|7
-毎|every|マイ|7
-語|word|(タン)ゴ|7
-文|sentence|ブン,も(じ)|7
-帰|to return|キ; かえ(る)|7
-入|to enter|ニュウ; はい(る); い; いり|7
-員|member|(カイシャ)イン|8
-新|new|シン; あたら(しい)|8
-聞|to listen|ブン; き(く)|8
-作|to make|サク; つく(る)|8
-仕|to serve|シ(ゴト); つか(える)|8
-事|thing|ジ; し(ごと); こと|8
-電|electricity|デン|8
-車|car|シャ; くるま|8
-休|to rest|キュウ; やす(む)|8
-言|to say|ゲン; い(う); こと|8
-読|to read|ドク; よ(む)|8
-思|to think|シ; おも(う)|8
-次|next|ジ; つぎ|8
-何|what|なに; なん|8
-午|noon|ゴ(ゴ)|9
-後|after|ゴ; あと; うし(ろ)|9
-前|before|ゼン; まえ|9
-名|name|メイ; ミョウ; な(まえ)|9
-白|white|ハク; しろ(い)|9
-雨|rain|ウ; (おお)あめ|9
-書|to write|ショ; か(く)|9
-友|friend|ユウ; とも|9
-間|between|カン; ゲン; あいだ|9
-家|house|カ; いえ; や|9
-話|to speak|ワ; はな(す); はなし|9
-少|few|ショウ; すこ(し); すく(ない)|9
-古|old|コ; ふる(い)|9
-知|to know|チ; し(る)|9
-来|to come|ライ; く(る)|9
-住|to live|ジュウ; す(む)|10
-正|right|ショウ; セイ; ただ(しい)|10
-年|year|ネン; とし|10
-売|to sell|バイ; う(る)|10
-買|to buy|バイ; か(う)|10
-町|town|チョウ; まち|10
-長|long|チョウ; なが(い)|10
-道|way|ドウ; みち|10
-雪|snow|セツ; ゆき|10
-立|to stand|リツ; た(つ)|10
-自|self|ジ; みずか(ら)|10
-夜|night|ヤ; よる; よ|10
-朝|morning|チョウ; あさ|10
-持|to hold|ジ; も(つ)|10
-手|hand|シュ; て|11
-紙|paper|シ; かみ; がみ|11
-好|favorite; to like|コウ; す(き); この(む)|11
-近|near|キン; ちか(い)|11
-明|bright|メイ; あか(るい)|11
-病|ill; sick|ビョウキ; やまい|11
-院|institution|(ビョウ)イン|11
-映|to reflect|エイ; うつ(す)|11
-画|picture|ガ; カク; え|11
-歌|to sing|カ; うた(う)|11
-市|city|シ; いち|11
-所|place|ジョ; ショ; ところ; どころ|11
-勉|to make efforts|ベン; つと(める)|11
-強|strong|キョウ; ゴウ; つよ(い)|11
-有|to exist|ユウ; あ(る)|11
-旅|travel|リョ; たび|11
-昔|old times|ムカシ|12
-々|(repeat symbol)||12
-神|god|シン; ジン; コウ; かみ|12
-早|early|ソウ; はや(い)|12
-起|to get up|キ; お(きる)|12
-牛|cow|ギュウ; うし|12
-使|to use|シ; つか(う)|12
-働|to work|ドウ; はたら(く); ばたら|12
-連|to link|レン; つ(れる)|12
-別|to separate|ベツ; わか(れる)|12
-度|time; degress|ド|12
-赤|red|セキ; あか(い)|12
-青|blue|セイ; あお(い)|12
-色|color|シキ; ショク; いろ|12
-物|thing|ブツ; もの|13
-鳥|bird|チョウ; とり|13
-料|ingredients; fare|リョウ(リ)|13
-理|reason|(リョウ)リ|13
-特|special|トク; トッ|13
-安|cheap; ease|アン; やす(い)|13
-飯|food; cooked rice|(ゴ)ハン|13
-肉|meat|ニク|13
-悪|bad; wrong|アク; オ; わる(い)|13
-体|body|タイ; テイ; からだ|13
-空|sky; empty|クウ; そら; あ(く); から|13
-港|port; harbor|コウ; みなと|13
-着|to reach; to wear|チャク; つ(く); き(る)|13
-同|same|ドウ; おな(じ)|13
-海|sea|カイ; うみ|13
-昼|noon; daytime|チュウ; ひる|13
-彼|he|かれ; かの|14
-代|age; replace|ダイ; か(わり)|14
-留|to stay; to keep|リュウ; ル|14
-族|family; tribe|(カ)ゾク|14
-親|parent; intimacy|シン; おや; した(しい)|14
-切|to cut|セツ; キッ; き(る)|14
-英|English; excellent|エイ(ゴ)|14
-店|shop|テン; みせ|14
-去|past; to leave|キョ; コ; さ(る)|14
-急|to hurry; emergency|キュウ; いそ(ぐ)|14
-乗|to ride|ジョウ; の(る)|14
-当|to hit|トウ; あ(たる)|14
-音|sound|オン; おと; ね|14
-楽|pleasure|ガク; ラク; たの(しい)|14
-医|doctor; medicine|(イ)シャ|14
-者|person|シャ; もの|14
-死|death; to die|シ; し(ぬ)|15
-意|mind; meaning|イ(ミ)|15
-味|flavor; taste|ミ; あじ|15
-注|to pour; to shed|チュウ; そそ(ぐ)|15
-夏|summer|カ; なつ|15
-魚|fish|ギョ; さかな; うお|15
-寺|temple|ジ; てら; でら|15
-広|spacious; wide|コウ; ひろ(い)|15
-転|to roll over|テン; ころ(ぶ)|15
-借|to borrow|シャク; シャッ; か(りる)|15
-走|to run|ソウ; はし(る)|15
-建|to build|ケン; た(てる); た(つ)|15
-地|ground|チ; ジ|15
-場|place|ジョウ; ば|15
-足|foot; leg|ソク; あし; た(りる)|15
-通|to pass; to commute|ツウ; とお(る); かよ(う)|15
-供|companion; offer|キョウ; とも; そな(える)|16
-世|world; generation|セ; セイ; よ|16
-界|world|(セ)カイ|16
-全|all|ゼン; まった(く); すべ(て)|16
-部|part; section|ブ; ヘ|16
-始|to begin|シ; はじ(まる); はじ(める)|16
-週|week|(マイ)シュウ|16
-以|by means of; compared with|イ(ガイ)|16
-考|to think; idea|コウ; かんが(える)|16
-開|to open|カイ; あ(ける); あ(く); ひら(く)|16
-屋|shop; house|オク; や|16
-方|direction; person|ホウ; かた; がた|16
-運|transport; luck|ウン; はこ(ぶ)|16
-動|to move|ドウ; うご(く)|16
-教|to teach|キョウ; おし(える)|16
-室|room|(キョウ)シツ|16
-歳|year; age|サイ; セイ|17
-習|to learn|シュウ; なら(う)|17
-主|main; lord|シュ; おも(に); ぬし|17
-結|to tie; to join|ケツ; ケッ; むす(ぶ)|17
-婚|marriage|(ケッ)コン|17
-集|to gather|シュウ; あつ(める)|17
-発|to start; to reveal|ハツ; ハッ; パツ|17
-表|to express; surface|ピョウ; ヒョウ; あらわ(す); おもて|17
-品|goods; refinement|ヒン; しな; じな|17
-字|character; letter|(カン)ジ|17
-活|lively|カツ; カッ|17
-写|to copy|シャ; うつ(す)|17
-真|true; reality|シン; ま|17
-歩|to walk|ホ; ポ; ある(く)|17
-野|field|ヤ; の|17
-目|eye|モク; め|18
-的|target; -ish|テキ; まと|18
-力|power|リョク; リキ; ちから|18
-洋|ocean; overseas|ヨウ(フク)|18
-服|clothes|(ヨウ)フク|18
-堂|hall|(ショク)ドウ|18
-授|to instruct|ジュ; さず(かる)|18
-業|business; vocation|(ジュ)ギョウ|18
-試|test; to try|シ; こころ(みる)|18
-験|to examine|(シ)ケン|18
-貸|to lend; loan|タイ; か(す)|18
-図|drawing; to devise|ト; ズ; はか(る)|18
-館|building; hall|(トショ)カン|18
-終|end|シュウ; お(わる)|18
-宿|inn; to lodge in|シュク; やど|18
-題|title; topic|(シュク)ダイ|18
-春|spring|シュン; はる|19
-秋|autumn|シュウ; あき|19
-冬|winter|トウ; ふゆ|19
-花|flower|カ; はな; ばな|19
-様|Mr.; Ms.; condition|ヨウ; さま|19
-不|negative; non-|フ; ブ|19
-姉|older sister|シ; あね; ねえ|19
-兄|older brother|キョウ; ケイ; あに; にい|19
-漢|China|カン(ジ)|19
-卒|to graduate|ソツ(ギョウ)|19
-工|craft; construction|コウ; ク|19
-究|research|キュウ; きわ(める)|19
-研|to polish; study|ケン; と(ぐ)|19
-質|quality; matter|シツ; シチ|19
-問|question|モン; と(う)|19
-多|many; much|タ; おお(い)|19
-皿|plate|さら; ざら|20
-声|voice|セイ; こえ|20
-茶|tea|チャ; サ|20
-止|to stop|シ; と(まる)|20
-枚|sheet of...|(イチ)マイ|20
-両|both|リョウ|20
-無|none|ム; ブ; な(い)|20
-払|to pay|はら(う); ばら(い)|20
-心|heart; mind|シン; こころ|20
-笑|to laugh|ショウ; わら(う); え|20
-絶|to discontinue|ゼツ; ゼッ; た(える)|20
-対|opposite|タイ; ツイ|20
-痛|pain|ツウ; いた(い)|20
-最|utmost|サイ; もっと(も)|20
-続|to continue|ゾク; つづ(ける)|20
-信|to trust; to believe|(ジ)シン|21
-経|to pass through|ケイ|21
-台|stand|タイ; ダイ|21
-風|wind|フウ; フ; かぜ|21
-犬|dog|ケン; いぬ|21
-重|heavy; to pile up|ジュウ; チョウ; おも(い); かさ(ねる)|21
-初|first|ショ; はじ(め); はつ|21
-若|young|わか(い)|21
-送|to send|ソウ; おく(る)|21
-幸|happiness|コウ; しあわ(せ); さいわ(い)|21
-計|to measure|ケイ; はか(る)|21
-遅|late|チ; おく(れる); おそ(い)|21
-配|to deliver|ハイ; パイ; くば(る)|21
-弟|younger brother|ダイ; デ; おとうと|21
-妹|younger sister|マイ; いもうと|21
-記|to write down|ニッ(キ)|22
-銀|silver|ギン(コウ)|22
-回|...times; to turn|カイ; まわ(す)|22
-夕|evening|ユウ(ガタ)|22
-黒|black|コク; くろ(い)|22
-用|task; to use|ヨウ(ジ)|22
-守|to keep; to protect|シュ; ス; まも(る)|22
-末|the end of|マツ; すえ|22
-待|to wait|タイ; ま(つ); まち|22
-残|to remain|ザン; のこ(す); のこ(り)|22
-番|order; number|(イチ)バン|22
-駅|station|エキ|22
-説|theory; to explain|セツ; セッ|22
-案|idea; proposal|アン(ナイ)|22
-内|inside; inner|ナイ; うち|22
-忘|to forget|ボウ; わす(れる)|22
-顔|face|ガン; かお; がお|23
-情|emotion; condition|ジョウ; なさ(け)|23
-怒|to get angry|ド; おこ(る); いか(り)|23
-変|change; abnormal|ヘン; か(える)|23
-相|mutual|ショウ; ソウ; あい|23
-横|sideways|オウ; よこ|23
-比|to compare|ヒ; くら(べる)|23
-化|to change into|カ; ケ; ば(ける)|23
-違|to differ|イ; ちが(う)|23
-悲|sad|ヒ; かな(しい)|23
-調|to investigate|チョウ; しら(べる)|23
-査|to inspect|(チョウ)サ|23
-果|fruit; result|カ; は(たす)|23
-感|to sense; to feel|(カン)ドウ|23
-答|answer|トウ; こた(える); こたえ|23
+一|one|イチ; イッ;ひと(つ)|3|0
+二|two|二; ふた|3|0
+三|three|サン; みっ|3|0
+四|four|シ; よん; よ; よっ|3|0
+五|five|ゴ; いつ|3|0
+六|six|ロク; ロッ; むっ|3|0
+七|seven|シチ; なな|3|0
+八|eight|ハチ; ハッ; やっ|3|0
+九|nine|キュウ; ク; ここの|3|0
+十|ten|ジュウ; ジュッ; ジッ; とお|3|0
+百|hundred|ヒャク; ビャク; ピャク|3|0
+千|thousand|セン; ゼン|3|0
+万|ten thousand|マン|3|0
+円|yen; circle|エン; まる|3|0
+時|time|ジ; とき|3|0
+日|day; sun|二; ニチ; ニッ; ひ; び; か|4|0
+本|book; basis|ホン; もと|4|0
+人|person|ジン; ニン; ひと|4|0
+月|month; moon|ゲツ; ガツ; つき|4|0
+火|fire|カ; ひ; び|4|0
+水|water|スイ; みず|4|0
+木|tree|モク; き|4|0
+金|gold; money|キン; かね|4|0
+土|soil|ド; ト; つち|4|0
+曜|weekday|ヨウ|4|0
+上|up|ジョウ; うえ; のぼ|4|0
+下|down|カ; した; くだ|4|0
+中|middle|チュウ; ジュウ; なか|4|0
+半|half|ハン|4|0
+山|mountain|サン; やま|5|0
+川|river|かわ; がわ|5|0
+林|woods|リン; はやし|5|1
+森|forest|シン; もり|5|1
+石|stone|セキ; コク; いし|5|1
+竹|bamboo|チク; たけ|5|1
+元|origin|ゲン; ガン; もと|5|0
+気|spirit|(ゲン)キ|5|0
+天|heaven|テン(キ)|5|0
+私|I; private|シ; わたし|5|0
+今|now|コン; いま|5|0
+田|rice field|た(んぼ); だ|5|0
+女|woman|ジョ; おんな|5|0
+男|man|ダン; おとこ|5|0
+見|to see|ケン; み(る)|5|0
+行|to go|コウ; ギョウ; い(く)|5|0
+食|to eat|ショク; た(べる)|5|0
+飲|to drink|イン; の(む)|5|0
+東|east|トウ; ひがし|6|0
+西|west|セイ; サイ; にし|6|0
+南|south|ナン; みなみ|6|0
+北|north|ホク; ホッ; きた|6|0
+口|mouth|コウ; くち; ぐち|6|0
+出|to exit|シュッ; シュツ; で(る); だ(す)|6|0
+右|right|ウ; ユウ; みぎ|6|0
+左|left|サ; ひだり|6|0
+分|minute; to divide|フン; ブン; プン; わ(ける)|6|0
+先|ahead|セン; さき|6|0
+生|birth|セイ; ショウ; う(まれる)|6|0
+大|big|ダイ; タイ; おお(きい)|6|0
+学|leaning|ガク; ガッ; まな(ぶ)|6|0
+外|outside|ガイ; そと|6|0
+国|country|コク; ゴク; コッ; くに|6|0
+王|king|オウ|6|1
+玉|jewel; ball|ギョク; たま|6|1
+京|capital|キョウ|7|0
+子|child|シ; こ(ども)|7|0
+小|small|ショウ; ちい(さい)|7|0
+会|to meet|カイ; あ(う)|7|0
+社|company|シャ; ジャ|7|0
+父|father|フ; ちち; とう|7|0
+母|mother|ボ; はは; かあ|7|0
+高|high|コウ; たか(い)|7|0
+校|school|(ガッ)コウ|7|0
+毎|every|マイ|7|0
+語|word|(タン)ゴ|7|0
+文|sentence|ブン,も(じ)|7|0
+帰|to return|キ; かえ(る)|7|0
+入|to enter|ニュウ; はい(る); い; いり|7|0
+員|member|(カイシャ)イン|8|0
+新|new|シン; あたら(しい)|8|0
+聞|to listen|ブン; き(く)|8|0
+作|to make|サク; つく(る)|8|0
+仕|to serve|シ(ゴト); つか(える)|8|0
+事|thing|ジ; し(ごと); こと|8|0
+電|electricity|デン|8|0
+車|car|シャ; くるま|8|0
+休|to rest|キュウ; やす(む)|8|0
+言|to say|ゲン; い(う); こと|8|0
+読|to read|ドク; よ(む)|8|0
+思|to think|シ; おも(う)|8|0
+次|next|ジ; つぎ|8|0
+何|what|なに; なん|8|0
+午|noon|ゴ(ゴ)|9|0
+後|after|ゴ; あと; うし(ろ)|9|0
+前|before|ゼン; まえ|9|0
+名|name|メイ; ミョウ; な(まえ)|9|0
+白|white|ハク; しろ(い)|9|0
+雨|rain|ウ; (おお)あめ|9|0
+書|to write|ショ; か(く)|9|0
+友|friend|ユウ; とも|9|0
+間|between|カン; ゲン; あいだ|9|0
+家|house|カ; いえ; や|9|0
+話|to speak|ワ; はな(す); はなし|9|0
+少|few|ショウ; すこ(し); すく(ない)|9|0
+古|old|コ; ふる(い)|9|0
+知|to know|チ; し(る)|9|0
+来|to come|ライ; く(る)|9|0
+住|to live|ジュウ; す(む)|10|0
+正|right|ショウ; セイ; ただ(しい)|10|0
+年|year|ネン; とし|10|0
+売|to sell|バイ; う(る)|10|0
+買|to buy|バイ; か(う)|10|0
+町|town|チョウ; まち|10|0
+村|village|ソン; むら|10|1
+長|long|チョウ; なが(い)|10|0
+道|way|ドウ; みち|10|0
+雪|snow|セツ; ゆき|10|0
+立|to stand|リツ; た(つ)|10|0
+自|self|ジ; みずか(ら)|10|0
+夜|night|ヤ; よる; よ|10|0
+朝|morning|チョウ; あさ|10|0
+持|to hold|ジ; も(つ)|10|0
+手|hand|シュ; て|11|0
+紙|paper|シ; かみ; がみ|11|0
+糸|thread|シ; いと|11|1
+好|favorite; to like|コウ; す(き); この(む)|11|0
+近|near|キン; ちか(い)|11|0
+明|bright|メイ; あか(るい)|11|0
+病|ill; sick|ビョウキ; やまい|11|0
+院|institution|(ビョウ)イン|11|0
+映|to reflect|エイ; うつ(す)|11|0
+画|picture|ガ; カク; え|11|0
+歌|to sing|カ; うた(う)|11|0
+市|city|シ; いち|11|0
+所|place|ジョ; ショ; ところ; どころ|11|0
+勉|to make efforts|ベン; つと(める)|11|0
+強|strong|キョウ; ゴウ; つよ(い)|11|0
+有|to exist|ユウ; あ(る)|11|0
+旅|travel|リョ; たび|11|0
+昔|old times|ムカシ|12|0
+々|(repeat symbol)||12|0
+神|god|シン; ジン; コウ; かみ|12|0
+早|early|ソウ; はや(い)|12|0
+起|to get up|キ; お(きる)|12|0
+牛|cow|ギュウ; うし|12|0
+虫|insect|チュウ; むし|12|1
+使|to use|シ; つか(う)|12|0
+働|to work|ドウ; はたら(く); ばたら|12|0
+連|to link|レン; つ(れる)|12|0
+別|to separate|ベツ; わか(れる)|12|0
+度|time; degress|ド|12|0
+赤|red|セキ; あか(い)|12|0
+青|blue|セイ; あお(い)|12|0
+色|color|シキ; ショク; いろ|12|0
+物|thing|ブツ; もの|13|0
+鳥|bird|チョウ; とり|13|0
+料|ingredients; fare|リョウ(リ)|13|0
+理|reason|(リョウ)リ|13|0
+特|special|トク; トッ|13|0
+安|cheap; ease|アン; やす(い)|13|0
+飯|food; cooked rice|(ゴ)ハン|13|0
+肉|meat|ニク|13|0
+悪|bad; wrong|アク; オ; わる(い)|13|0
+体|body|タイ; テイ; からだ|13|0
+空|sky; empty|クウ; そら; あ(く); から|13|0
+港|port; harbor|コウ; みなと|13|0
+着|to reach; to wear|チャク; つ(く); き(る)|13|0
+同|same|ドウ; おな(じ)|13|0
+海|sea|カイ; うみ|13|0
+昼|noon; daytime|チュウ; ひる|13|0
+彼|he|かれ; かの|14|0
+代|age; replace|ダイ; か(わり)|14|0
+留|to stay; to keep|リュウ; ル|14|0
+族|family; tribe|(カ)ゾク|14|0
+親|parent; intimacy|シン; おや; した(しい)|14|0
+切|to cut|セツ; キッ; き(る)|14|0
+英|English; excellent|エイ(ゴ)|14|0
+店|shop|テン; みせ|14|0
+去|past; to leave|キョ; コ; さ(る)|14|0
+急|to hurry; emergency|キュウ; いそ(ぐ)|14|0
+乗|to ride|ジョウ; の(る)|14|0
+当|to hit|トウ; あ(たる)|14|0
+音|sound|オン; おと; ね|14|0
+楽|pleasure|ガク; ラク; たの(しい)|14|0
+医|doctor; medicine|(イ)シャ|14|0
+者|person|シャ; もの|14|0
+死|death; to die|シ; し(ぬ)|15|0
+意|mind; meaning|イ(ミ)|15|0
+味|flavor; taste|ミ; あじ|15|0
+注|to pour; to shed|チュウ; そそ(ぐ)|15|0
+夏|summer|カ; なつ|15|0
+魚|fish|ギョ; さかな; うお|15|0
+貝|shellfish|バイ; かい|15|1
+寺|temple|ジ; てら; でら|15|0
+広|spacious; wide|コウ; ひろ(い)|15|0
+転|to roll over|テン; ころ(ぶ)|15|0
+借|to borrow|シャク; シャッ; か(りる)|15|0
+走|to run|ソウ; はし(る)|15|0
+建|to build|ケン; た(てる); た(つ)|15|0
+地|ground|チ; ジ|15|0
+場|place|ジョウ; ば|15|0
+足|foot; leg|ソク; あし; た(りる)|15|0
+通|to pass; to commute|ツウ; とお(る); かよ(う)|15|0
+供|companion; offer|キョウ; とも; そな(える)|16|0
+世|world; generation|セ; セイ; よ|16|0
+界|world|(セ)カイ|16|0
+全|all|ゼン; まった(く); すべ(て)|16|0
+部|part; section|ブ; ヘ|16|0
+始|to begin|シ; はじ(まる); はじ(める)|16|0
+週|week|(マイ)シュウ|16|0
+以|by means of; compared with|イ(ガイ)|16|0
+考|to think; idea|コウ; かんが(える)|16|0
+開|to open|カイ; あ(ける); あ(く); ひら(く)|16|0
+屋|shop; house|オク; や|16|0
+方|direction; person|ホウ; かた; がた|16|0
+運|transport; luck|ウン; はこ(ぶ)|16|0
+動|to move|ドウ; うご(く)|16|0
+教|to teach|キョウ; おし(える)|16|0
+室|room|(キョウ)シツ|16|0
+歳|year; age|サイ; セイ|17|0
+習|to learn|シュウ; なら(う)|17|0
+主|main; lord|シュ; おも(に); ぬし|17|0
+結|to tie; to join|ケツ; ケッ; むす(ぶ)|17|0
+婚|marriage|(ケッ)コン|17|0
+集|to gather|シュウ; あつ(める)|17|0
+発|to start; to reveal|ハツ; ハッ; パツ|17|0
+表|to express; surface|ピョウ; ヒョウ; あらわ(す); おもて|17|0
+品|goods; refinement|ヒン; しな; じな|17|0
+字|character; letter|(カン)ジ|17|0
+活|lively|カツ; カッ|17|0
+写|to copy|シャ; うつ(す)|17|0
+真|true; reality|シン; ま|17|0
+歩|to walk|ホ; ポ; ある(く)|17|0
+野|field|ヤ; の|17|0
+目|eye|モク; め|18|0
+耳|ear|ジ; ニ; みみ|18|1
+的|target; -ish|テキ; まと|18|0
+力|power|リョク; リキ; ちから|18|0
+洋|ocean; overseas|ヨウ(フク)|18|0
+服|clothes|(ヨウ)フク|18|0
+堂|hall|(ショク)ドウ|18|0
+授|to instruct|ジュ; さず(かる)|18|0
+業|business; vocation|(ジュ)ギョウ|18|0
+試|test; to try|シ; こころ(みる)|18|0
+験|to examine|(シ)ケン|18|0
+貸|to lend; loan|タイ; か(す)|18|0
+図|drawing; to devise|ト; ズ; はか(る)|18|0
+館|building; hall|(トショ)カン|18|0
+終|end|シュウ; お(わる)|18|0
+宿|inn; to lodge in|シュク; やど|18|0
+題|title; topic|(シュク)ダイ|18|0
+春|spring|シュン; はる|19|0
+秋|autumn|シュウ; あき|19|0
+冬|winter|トウ; ふゆ|19|0
+花|flower|カ; はな; ばな|19|0
+草|grass|ソウ; くさ|19|1
+様|Mr.; Ms.; condition|ヨウ; さま|19|0
+不|negative; non-|フ; ブ|19|0
+姉|older sister|シ; あね; ねえ|19|0
+兄|older brother|キョウ; ケイ; あに; にい|19|0
+漢|China|カン(ジ)|19|0
+卒|to graduate|ソツ(ギョウ)|19|0
+工|craft; construction|コウ; ク|19|0
+究|research|キュウ; きわ(める)|19|0
+研|to polish; study|ケン; と(ぐ)|19|0
+質|quality; matter|シツ; シチ|19|0
+問|question|モン; と(う)|19|0
+多|many; much|タ; おお(い)|19|0
+皿|plate|さら; ざら|20|0
+声|voice|セイ; こえ|20|0
+茶|tea|チャ; サ|20|0
+止|to stop|シ; と(まる)|20|0
+枚|sheet of...|(イチ)マイ|20|0
+両|both|リョウ|20|0
+無|none|ム; ブ; な(い)|20|0
+払|to pay|はら(う); ばら(い)|20|0
+心|heart; mind|シン; こころ|20|0
+笑|to laugh|ショウ; わら(う); え|20|0
+絶|to discontinue|ゼツ; ゼッ; た(える)|20|0
+対|opposite|タイ; ツイ|20|0
+痛|pain|ツウ; いた(い)|20|0
+最|utmost|サイ; もっと(も)|20|0
+続|to continue|ゾク; つづ(ける)|20|0
+信|to trust; to believe|(ジ)シン|21|0
+経|to pass through|ケイ|21|0
+台|stand|タイ; ダイ|21|0
+風|wind|フウ; フ; かぜ|21|0
+犬|dog|ケン; いぬ|21|0
+重|heavy; to pile up|ジュウ; チョウ; おも(い); かさ(ねる)|21|0
+初|first|ショ; はじ(め); はつ|21|0
+若|young|わか(い)|21|0
+送|to send|ソウ; おく(る)|21|0
+幸|happiness|コウ; しあわ(せ); さいわ(い)|21|0
+計|to measure|ケイ; はか(る)|21|0
+遅|late|チ; おく(れる); おそ(い)|21|0
+配|to deliver|ハイ; パイ; くば(る)|21|0
+弟|younger brother|ダイ; デ; おとうと|21|0
+妹|younger sister|マイ; いもうと|21|0
+記|to write down|ニッ(キ)|22|0
+銀|silver|ギン(コウ)|22|0
+回|...times; to turn|カイ; まわ(す)|22|0
+夕|evening|ユウ(ガタ)|22|0
+黒|black|コク; くろ(い)|22|0
+用|task; to use|ヨウ(ジ)|22|0
+守|to keep; to protect|シュ; ス; まも(る)|22|0
+末|the end of|マツ; すえ|22|0
+待|to wait|タイ; ま(つ); まち|22|0
+残|to remain|ザン; のこ(す); のこ(り)|22|0
+番|order; number|(イチ)バン|22|0
+駅|station|エキ|22|0
+説|theory; to explain|セツ; セッ|22|0
+案|idea; proposal|アン(ナイ)|22|0
+内|inside; inner|ナイ; うち|22|0
+忘|to forget|ボウ; わす(れる)|22|0
+顔|face|ガン; かお; がお|23|0
+情|emotion; condition|ジョウ; なさ(け)|23|0
+怒|to get angry|ド; おこ(る); いか(り)|23|0
+変|change; abnormal|ヘン; か(える)|23|0
+相|mutual|ショウ; ソウ; あい|23|0
+横|sideways|オウ; よこ|23|0
+比|to compare|ヒ; くら(べる)|23|0
+化|to change into|カ; ケ; ば(ける)|23|0
+違|to differ|イ; ちが(う)|23|0
+悲|sad|ヒ; かな(しい)|23|0
+調|to investigate|チョウ; しら(べる)|23|0
+査|to inspect|(チョウ)サ|23|0
+果|fruit; result|カ; は(たす)|23|0
+感|to sense; to feel|(カン)ドウ|23|0
+答|answer|トウ; こた(える); こたえ|23|0
 `;
 
-        /*extra
-        林|woods|はやし|100
-        空|sky|そら|100
-        花|flower|はな|100
-        草|grass|くさ|100
-        虫|insect|むし|100
-        犬|dog|いぬ|100
-        目|eye|め|100
-        耳|ear|みみ|100
-        足|foot|あし|100
-        音|sound|おと|100
-        力|power|ちから|100
-        夕|evening|ゆう|100
-        字|character|(も)じ|100
-        村|village|むら|100
-        森|forest|もり|100
-        玉|jewel; ball|たま|100
-        王|king|おう(さま)|100
-        竹|bamboo|たけ|100
-        糸|thread|いと|100
-        貝|shell|かい|100
-        走|run|はし(る)|100
-        春|spring|はる|100
-        夏|summer|なつ|100
-        秋|autumn|あき|100
-        冬|winter|ふゆ|100
-        多|many|おお(い)|100
-        広|wide|ひろ(い)|100
-        兄|older brother|あに|100
-        弟|younger brother|おとうと|100
-        */
-
         const KANJI_DATABASE = RAW_KANJI_DATA.trim().split('\n').map(line => {
-            const [kanji, meaning, hiragana, lesson] = line.split('|');
-            return { kanji, meaning, hiragana, lesson: parseInt(lesson, 10) };
+            const [kanji, meaning, hiragana, lesson, bonus] = line.split('|');
+            return { 
+                kanji, 
+                meaning, 
+                hiragana, 
+                lesson: parseInt(lesson, 10),
+                isBonus: parseInt(bonus, 10) === 1
+            };
         });
 
         // --- COMPOSITE SCORING THRESHOLDS (TUNABLE) ---
