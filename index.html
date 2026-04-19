@@ -6,6 +6,13 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Kanji Drawing Practice</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            future: {
+                hoverOnlyWhenSupported: true,
+            }
+        }
+    </script>
     <style>
         body {
             touch-action: none;
@@ -31,19 +38,24 @@
     <!-- Main View -->
     <div id="main-view" class="w-full max-w-md px-4 flex flex-col items-center h-full">
         <!-- Header / Prompt -->
-        <div class="bg-white rounded-2xl shadow-sm p-6 mb-6 w-full text-center relative">
-            <button id="settings-btn"
-                class="absolute top-4 right-4 p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-full transition-colors">
-                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
-                    stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <path
-                        d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z">
-                    </path>
-                    <circle cx="12" cy="12" r="3"></circle>
-                </svg>
-            </button>
-            <h1 class="text-sm text-gray-500 uppercase tracking-wider font-bold mb-1">Draw the Kanji for:</h1>
-            <h2 id="prompt-meaning" class="text-3xl font-extrabold text-indigo-600 mb-1">Loading...</h2>
+        <div class="bg-white rounded-2xl pt-3 pb-3 px-4 mb-4 w-full flex flex-col relative">
+            <div class="flex justify-between items-center w-full mb-3">
+                <div class="w-10"></div> <!-- Spacer for center balance -->
+                <h1 class="text-sm text-gray-500 uppercase tracking-wider font-bold text-center">Draw the Kanji for:</h1>
+                <button id="settings-btn"
+                    class="p-2 -mr-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-full transition-colors flex-shrink-0">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                        stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path
+                            d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z">
+                        </path>
+                        <circle cx="12" cy="12" r="3"></circle>
+                    </svg>
+                </button>
+            </div>
+            <div class="min-h-[104px] flex flex-col justify-center items-center w-full">
+                <h2 id="prompt-meaning" class="text-3xl font-extrabold text-indigo-600 text-center w-full">Loading...</h2>
+            </div>
         </div>
 
         <!-- Canvas Container -->
@@ -76,12 +88,23 @@
         <div class="flex justify-between items-center mb-4 mt-2">
             <h2 id="settings-title" class="text-2xl font-bold text-gray-800">Select Kanji</h2>
             <div id="search-container" class="hidden flex-1 items-center bg-gray-200 rounded-full px-3 py-1.5 mr-2">
-                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-gray-500 mr-2 flex-shrink-0"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
-                <input type="text" id="search-input" class="bg-transparent outline-none w-full text-gray-700" placeholder="Search...">
+                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none"
+                    stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                    class="text-gray-500 mr-2 flex-shrink-0">
+                    <circle cx="11" cy="11" r="8"></circle>
+                    <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                </svg>
+                <input type="text" id="search-input" class="bg-transparent outline-none w-full text-gray-700"
+                    placeholder="Search...">
             </div>
             <div class="flex items-center space-x-2">
-                <button id="search-toggle-btn" class="p-2 bg-gray-200 text-gray-700 rounded-full hover:bg-gray-300 transition-colors">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+                <button id="search-toggle-btn"
+                    class="p-2 bg-gray-200 text-gray-700 rounded-full hover:bg-gray-300 transition-colors">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                        stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="11" cy="11" r="8"></circle>
+                        <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                    </svg>
                 </button>
                 <button id="close-settings-btn"
                     class="p-2 bg-gray-200 text-gray-700 rounded-full hover:bg-gray-300 transition-colors">
@@ -101,146 +124,184 @@
     <script>
         // --- DATA: Compact Kanji Dictionary ---
         const RAW_KANJI_DATA = `
-一|one|イチ;イッ;ひと|3
-二|two|二;ふた|3
-三|three|サン;みっ|3
-四|four|シ;よん;よ;よっ|3
-五|five|ゴ;いつ|3
-六|six|ロク;ロッ;むっ|3
-七|seven|シチ;なな|3
-八|eight|ハチ;ハッ;やっ|3
-九|nine|キュウ;ク;ここの|3
-十|ten|ジュウ;ジュッ;ジッ;とお|3
-百|hundred|ヒャク;ビャク;ピャク|3
-千|thousand|セン;ゼン|3
+一|one|イチ; イッ;ひと|3
+二|two|二; ふた|3
+三|three|サン; みっ|3
+四|four|シ; よん; よ; よっ|3
+五|five|ゴ; いつ|3
+六|six|ロク; ロッ; むっ|3
+七|seven|シチ; なな|3
+八|eight|ハチ; ハッ; やっ|3
+九|nine|キュウ; ク; ここの|3
+十|ten|ジュウ; ジュッ; ジッ; とお|3
+百|hundred|ヒャク; ビャク; ピャク|3
+千|thousand|セン; ゼン|3
 万|ten thousand|マン|3
-円|yen;circle|エン;まる|3
-時|time|ジ;とき|3
-日|day;sun|二;ニチ;ニッ;ひ;び;か|4
-本|book;basis|ホン;もと|4
-人|person|ジン;ニン;ひと|4
-月|month;moon|ゲツ;ガツ;つき|4
-火|fire|カ;ひ;び|4
-水|water|スイ;みず|4
-木|tree|モク;き|4
-金|gold;money|キン;かね|4
-土|soil|ド;ト;つち|4
+円|yen; circle|エン; まる|3
+時|time|ジ; とき|3
+日|day; sun|二; ニチ; ニッ; ひ; び; か|4
+本|book; basis|ホン; もと|4
+人|person|ジン; ニン; ひと|4
+月|month; moon|ゲツ; ガツ; つき|4
+火|fire|カ; ひ; び|4
+水|water|スイ; みず|4
+木|tree|モク; き|4
+金|gold; money|キン; かね|4
+土|soil|ド; ト; つち|4
 曜|weekday|ヨウ|4
-上|up|ジョウ;うえ;のぼ|4
-下|down|カ;した;くだ|4
-中|middle|チュウ;ジュウ;なか|4
+上|up|ジョウ; うえ; のぼ|4
+下|down|カ; した; くだ|4
+中|middle|チュウ; ジュウ; なか|4
 半|half|ハン|4
-山|mountain|サン;やま|5
-川|river|かわ;がわ|5
-元|origin|ゲン;ガン;もと|5
+山|mountain|サン; やま|5
+川|river|かわ; がわ|5
+元|origin|ゲン; ガン; もと|5
 気|spirit|(ゲン)キ|5
 天|heaven|テン(キ)|5
-私|I;private|シ;わたし|5
-今|now|コン;いま|5
-田|rice field|た(んぼ);だ|5
-女|woman|ジョ;おんな|5
-男|man|ダン;おとこ|5
-見|to see|ケン;み(る)|5
-行|to go|コウ;ギョウ;い(く)|5
-食|to eat|ショク;た(べる)|5
-飲|to drink|イン;の(む)|5
-東|east|トウ;ひがし|6
-西|west|セイ;サイ;にし|6
-南|south|ナン;みなみ|6
-北|north|ホク;ホッ;きた|6
-口|mouth|コウ;くち;ぐち|6
-出|to exit|シュッ;シュツ;で(る);だ(す)|6
-右|right|ウ;ユウ;みぎ|6
-左|left|サ;ひだり|6
-分|minute;to divide|フン;ブン;プン;わ(ける)|6
-先|ahead|セン;さき|6
-生|birth|セイ;ショウ;う(まれる)|6
-大|big|ダイ;タイ;おお(きい)|6
-学|leaning|ガク;ガッ;まな(ぶ)|6
-外|outside|ガイ;そと|6
-国|country|コク;ゴク;コッ;くに|6
+私|I; private|シ; わたし|5
+今|now|コン; いま|5
+田|rice field|た(んぼ); だ|5
+女|woman|ジョ; おんな|5
+男|man|ダン; おとこ|5
+見|to see|ケン; み(る)|5
+行|to go|コウ; ギョウ; い(く)|5
+食|to eat|ショク; た(べる)|5
+飲|to drink|イン; の(む)|5
+東|east|トウ; ひがし|6
+西|west|セイ; サイ; にし|6
+南|south|ナン; みなみ|6
+北|north|ホク; ホッ; きた|6
+口|mouth|コウ; くち; ぐち|6
+出|to exit|シュッ; シュツ; で(る); だ(す)|6
+右|right|ウ; ユウ; みぎ|6
+左|left|サ; ひだり|6
+分|minute; to divide|フン; ブン; プン; わ(ける)|6
+先|ahead|セン; さき|6
+生|birth|セイ; ショウ; う(まれる)|6
+大|big|ダイ; タイ; おお(きい)|6
+学|leaning|ガク; ガッ; まな(ぶ)|6
+外|outside|ガイ; そと|6
+国|country|コク; ゴク; コッ; くに|6
 京|capital|キョウ|7
-子|child|シ;こ(ども)|7
-小|small|ショウ;ちい(さい)|7
-会|to meet|カイ;あ(う)|7
-社|company|シャ;ジャ|7
-父|father|フ;ちち;とう|7
-母|mother|ボ;はは;かあ|7
-高|high|コウ;たか(い)|7
+子|child|シ; こ(ども)|7
+小|small|ショウ; ちい(さい)|7
+会|to meet|カイ; あ(う)|7
+社|company|シャ; ジャ|7
+父|father|フ; ちち; とう|7
+母|mother|ボ; はは; かあ|7
+高|high|コウ; たか(い)|7
 校|school|(ガッ)コウ|7
 毎|every|マイ|7
 語|word|(タン)ゴ|7
 文|sentence|ブン,も(じ)|7
-帰|to return|キ;かえ(る)|7
-入|to enter|ニュウ;はい(る);い;いり|7
+帰|to return|キ; かえ(る)|7
+入|to enter|ニュウ; はい(る); い; いり|7
 員|member|イン|8
-新|new|シン;あたら(しい)|8
-聞|to listen|ブン;き(く)|8
-作|to make|サク;つく(る)|8
-仕|to serve|シ(ゴト);つか(える)|8
-事|thing|ジ;し(ごと);こと|8
+新|new|シン; あたら(しい)|8
+聞|to listen|ブン; き(く)|8
+作|to make|サク; つく(る)|8
+仕|to serve|シ(ゴト); つか(える)|8
+事|thing|ジ; し(ごと); こと|8
 電|electricity|デン|8
-車|car|シャ;くるま|8
-休|to rest|キュウ;やす(む)|8
-言|to say|ゲン;い(う);こと|8
-読|to read|ドク;よ(む)|8
-思|to think|シ;おも(う)|8
-次|next|ジ;つぎ|8
-何|what|なに;なん|8
+車|car|シャ; くるま|8
+休|to rest|キュウ; やす(む)|8
+言|to say|ゲン; い(う); こと|8
+読|to read|ドク; よ(む)|8
+思|to think|シ; おも(う)|8
+次|next|ジ; つぎ|8
+何|what|なに; なん|8
 午|noon|ゴ(ゴ)|9
-後|after|ゴ;あと;うし(ろ)|9
-前|before|ゼン;まえ|9
-名|name|メイ;ミョウ;な(まえ)|9
-白|white|ハク;しろ(い)|9
-雨|rain|ウ;(おお)あめ|9
-書|to write|ショ;か(く)|9
-友|friend|ユウ;とも|9
-間|between|カン;ゲン;あいだ|9
-家|house|カ;いえ;や|9
-話|to speak|ワ;はな(す);はなし|9
-少|few|ショウ;すこ(し);すく(ない)|9
-古|old|コ;ふる(い)|9
-知|to know|チ;し(る)|9
-来|to come|ライ;く(る)|9
-年|year|とし;ねん|100
-早|early|はや(い)|100
-林|woods|はやし|100
-空|sky|そら|100
-花|flower|はな|100
-草|grass|くさ|100
-虫|insect|むし|100
-犬|dog|いぬ|100
-目|eye|め|100
-耳|ear|みみ|100
-手|hand|て|100
-足|foot|あし|100
-音|sound|おと|100
-力|power|ちから|100
-立|stand|た(つ)|100
-夕|evening|ゆう|100
-字|character|(も)じ|100
-村|village|むら|100
-町|town|まち|100
-森|forest|もり|100
-正|correct|ただ(しい)|100
-玉|jewel;ball|たま|100
-王|king|おう(さま)|100
-竹|bamboo|たけ|100
-糸|thread|いと|100
-貝|shell|かい|100
-赤|red|あか|100
-走|run|はし(る)|100
-青|blue|あお|100
-春|spring|はる|100
-夏|summer|なつ|100
-秋|autumn|あき|100
-冬|winter|ふゆ|100
-多|many|おお(い)|100
-長|long|なが(い)|100
-広|wide|ひろ(い)|100
-兄|older brother|あに|100
-弟|younger brother|おとうと|100
+後|after|ゴ; あと; うし(ろ)|9
+前|before|ゼン; まえ|9
+名|name|メイ; ミョウ; な(まえ)|9
+白|white|ハク; しろ(い)|9
+雨|rain|ウ; (おお)あめ|9
+書|to write|ショ; か(く)|9
+友|friend|ユウ; とも|9
+間|between|カン; ゲン; あいだ|9
+家|house|カ; いえ; や|9
+話|to speak|ワ; はな(す); はなし|9
+少|few|ショウ; すこ(し); すく(ない)|9
+古|old|コ; ふる(い)|9
+知|to know|チ; し(る)|9
+来|to come|ライ; く(る)|9
+住|to live|ジュウ; す(む)|10
+正|right|ショウ; セイ; ただ(しい)|10
+年|year|ネン; とし|10
+売|to sell|バイ; う(る)|10
+買|to buy|バイ; か(う)|10
+町|town|チョウ; まち|10
+長|long|チョウ; なが(い)|10
+道|way|ドウ; みち|10
+雪|snow|セツ; ゆき|10
+立|to stand|リツ; た(つ)|10
+自|self|ジ; みずか(ら)|10
+夜|night|ヤ; よる; よ|10
+朝|morning|チョウ; あさ|10
+持|to hold|ジ; も(つ)|10
+手|hand|シュ; て|11
+紙|paper|シ; かみ; がみ|11
+好|favorite; to like|コウ; す(き); この(む)|11
+近|near|キン; ちか(い)|11
+明|bright|メイ; あか(るい)|11
+病|ill; sick|ビョウキ; やまい|11
+院|institution|イン|11
+映|to reflect|エイ; うつ(す)|11
+画|picture|ガ; カク; え|11
+歌|to sing|カ; うた(う)|11
+市|city|シ; いち|11
+所|place|ジョ; ショ; ところ; どころ|11
+勉|to make efforts|ベン; つと(める)|11
+強|strong|キョウ; ゴウ; つよ(い)|11
+有|to exist|ユウ; あ(る)|11
+旅|travel|リョ; たび|11
+昔|old times|ムカシ|12
+々|(repeat symbol)||12
+神|god|シン; ジン; コウ; かみ|12
+早|early|ソウ; はや(い)|12
+起|to get up|キ; お(きる)|12
+牛|cow|ギュウ; うし|12
+使|to use|シ; つか(う)|12
+働|to work|ドウ; はたら(く); ばたら|12
+連|to link|レン; つ(れる)|12
+別|to separate|ベツ; わか(れる)|12
+度|time; degress|ド|12
+赤|red|セキ; あか(い)|12
+青|blue|セイ; あお(い)|12
+色|color|シキ; ショク; いろ|12
 `;
+
+        /*extra
+        林|woods|はやし|100
+        空|sky|そら|100
+        花|flower|はな|100
+        草|grass|くさ|100
+        虫|insect|むし|100
+        犬|dog|いぬ|100
+        目|eye|め|100
+        耳|ear|みみ|100
+        足|foot|あし|100
+        音|sound|おと|100
+        力|power|ちから|100
+        夕|evening|ゆう|100
+        字|character|(も)じ|100
+        村|village|むら|100
+        森|forest|もり|100
+        玉|jewel; ball|たま|100
+        王|king|おう(さま)|100
+        竹|bamboo|たけ|100
+        糸|thread|いと|100
+        貝|shell|かい|100
+        走|run|はし(る)|100
+        春|spring|はる|100
+        夏|summer|なつ|100
+        秋|autumn|あき|100
+        冬|winter|ふゆ|100
+        多|many|おお(い)|100
+        広|wide|ひろ(い)|100
+        兄|older brother|あに|100
+        弟|younger brother|おとうと|100
+        */
 
         const KANJI_DATABASE = RAW_KANJI_DATA.trim().split('\n').map(line => {
             const [kanji, meaning, hiragana, lesson] = line.split('|');
@@ -552,20 +613,28 @@
                 groupDiv.className = 'mb-4';
 
                 const headerDiv = document.createElement('div');
-                headerDiv.className = 'group flex items-center p-3 mb-2 bg-indigo-100 hover:bg-indigo-200 rounded-lg transition-colors cursor-pointer';
+                headerDiv.className = 'group flex mb-2 bg-indigo-100 hover:bg-indigo-200 rounded-lg transition-colors overflow-hidden';
+
+                const cbWrapper = document.createElement('label');
+                cbWrapper.className = 'flex items-center pl-3 py-3 pr-2 cursor-pointer h-full';
 
                 const groupCb = document.createElement('input');
                 groupCb.type = 'checkbox';
                 groupCb.id = `group-cb-${lesson}`;
                 groupCb.className = 'w-5 h-5 text-indigo-600 rounded border-gray-300 focus:ring-indigo-500 mr-3 cursor-pointer flex-shrink-0';
 
-                const headerLabel = document.createElement('label');
-                headerLabel.htmlFor = `group-cb-${lesson}`;
-                headerLabel.className = 'text-lg font-bold text-gray-700 cursor-pointer select-none whitespace-nowrap flex-shrink-0';
-                headerLabel.textContent = `Lesson ${lesson}`;
+                const headerLabelText = document.createElement('span');
+                headerLabelText.className = 'text-lg font-bold text-gray-700 select-none whitespace-nowrap flex-shrink-0';
+                headerLabelText.textContent = `Lesson ${lesson}`;
+
+                cbWrapper.appendChild(groupCb);
+                cbWrapper.appendChild(headerLabelText);
+
+                const toggleArea = document.createElement('div');
+                toggleArea.className = 'flex-1 flex items-center pr-3 py-3 pl-1 overflow-hidden cursor-pointer h-full';
 
                 const kanjiListContainer = document.createElement('div');
-                kanjiListContainer.className = 'flex-1 overflow-hidden mx-2 text-sm text-gray-500 whitespace-nowrap pointer-events-none';
+                kanjiListContainer.className = 'flex-1 overflow-hidden mr-2 text-sm text-gray-500 whitespace-nowrap pointer-events-none';
                 kanjiListContainer.style.webkitMaskImage = 'linear-gradient(to right, black 70%, transparent 100%)';
                 kanjiListContainer.style.maskImage = 'linear-gradient(to right, black 70%, transparent 100%)';
                 kanjiListContainer.textContent = `(${lessons[lesson].map(k => k.kanji).join(', ')})`;
@@ -574,10 +643,11 @@
                 toggleBtn.className = 'ml-auto text-gray-400 group-hover:text-gray-600 transition-transform flex-shrink-0 pointer-events-none';
                 toggleBtn.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>`;
 
-                headerDiv.appendChild(groupCb);
-                headerDiv.appendChild(headerLabel);
-                headerDiv.appendChild(kanjiListContainer);
-                headerDiv.appendChild(toggleBtn);
+                toggleArea.appendChild(kanjiListContainer);
+                toggleArea.appendChild(toggleBtn);
+
+                headerDiv.appendChild(cbWrapper);
+                headerDiv.appendChild(toggleArea);
                 groupDiv.appendChild(headerDiv);
 
                 const gridDiv = document.createElement('div');
@@ -597,8 +667,7 @@
                     }
                 }
 
-                headerDiv.addEventListener('click', (e) => {
-                    if (e.target === groupCb || e.target === headerLabel) return;
+                toggleArea.addEventListener('click', () => {
                     toggleLesson();
                 });
 
@@ -742,7 +811,14 @@
                 const paths = Array.from(pathEls).map(el => el.getAttribute('d'));
 
                 const showEnglish = Math.random() > 0.5;
-                promptMeaning.textContent = showEnglish ? data.meaning : data.hiragana;
+                let promptText = showEnglish ? data.meaning : data.hiragana;
+                if (!promptText || promptText.trim() === '') {
+                    promptText = showEnglish ? data.hiragana : data.meaning;
+                }
+                
+                // Wrap segments as stylish chips to visually separate them and prevent awkward breaks
+                const segments = promptText.split(';').map(s => s.trim());
+                promptMeaning.innerHTML = `<div class="flex flex-wrap justify-center gap-2">${segments.map(s => `<span class="bg-indigo-50 border border-indigo-200 text-indigo-700 rounded-2xl px-4 py-1 shadow-sm">${s}</span>`).join('')}</div>`;
 
                 expectedStrokes = paths.map(path => getPointsFromSvgPath(path, NUM_POINTS));
                 updateProgress();
@@ -1068,10 +1144,10 @@
                 const dom = kanjiDomElements[data.kanji];
                 if (!dom) return;
 
-                const matches = data.kanji.includes(query) || 
-                                data.meaning.toLowerCase().includes(query) || 
-                                data.hiragana.includes(query);
-                
+                const matches = data.kanji.includes(query) ||
+                    data.meaning.toLowerCase().includes(query) ||
+                    data.hiragana.includes(query);
+
                 if (matches) {
                     dom.itemDiv.classList.add('bg-yellow-200');
                     dom.expandLesson();
