@@ -41,7 +41,8 @@
         <div class="bg-white rounded-2xl pt-3 pb-3 px-4 mb-4 w-full flex flex-col relative">
             <div class="flex justify-between items-center w-full mb-3">
                 <div class="w-10"></div> <!-- Spacer for center balance -->
-                <h1 class="text-sm text-gray-500 uppercase tracking-wider font-bold text-center">Draw the Kanji for:</h1>
+                <h1 class="text-sm text-gray-500 uppercase tracking-wider font-bold text-center">Draw the Kanji for:
+                </h1>
                 <button id="settings-btn"
                     class="p-2 -mr-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-full transition-colors flex-shrink-0">
                     <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
@@ -54,7 +55,8 @@
                 </button>
             </div>
             <div class="min-h-[104px] flex flex-col justify-center items-center w-full">
-                <h2 id="prompt-meaning" class="text-3xl font-extrabold text-indigo-600 text-center w-full">Loading...</h2>
+                <h2 id="prompt-meaning" class="text-3xl font-extrabold text-indigo-600 text-center w-full">Loading...
+                </h2>
             </div>
         </div>
 
@@ -124,7 +126,7 @@
     <script>
         // --- DATA: Compact Kanji Dictionary ---
         const RAW_KANJI_DATA = `
-一|one|イチ; イッ;ひと|3
+一|one|イチ; イッ;ひと(つ)|3
 二|two|二; ふた|3
 三|three|サン; みっ|3
 四|four|シ; よん; よ; よっ|3
@@ -196,7 +198,7 @@
 文|sentence|ブン,も(じ)|7
 帰|to return|キ; かえ(る)|7
 入|to enter|ニュウ; はい(る); い; いり|7
-員|member|イン|8
+員|member|(カイシャ)イン|8
 新|new|シン; あたら(しい)|8
 聞|to listen|ブン; き(く)|8
 作|to make|サク; つく(る)|8
@@ -245,7 +247,7 @@
 近|near|キン; ちか(い)|11
 明|bright|メイ; あか(るい)|11
 病|ill; sick|ビョウキ; やまい|11
-院|institution|イン|11
+院|institution|(ビョウ)イン|11
 映|to reflect|エイ; うつ(す)|11
 画|picture|ガ; カク; え|11
 歌|to sing|カ; うた(う)|11
@@ -824,7 +826,7 @@
                 if (!promptText || promptText.trim() === '') {
                     promptText = showEnglish ? data.hiragana : data.meaning;
                 }
-                
+
                 // Wrap segments as stylish chips to visually separate them and prevent awkward breaks
                 const segments = promptText.split(';').map(s => s.trim());
                 promptMeaning.innerHTML = `<div class="flex flex-wrap justify-center gap-2">${segments.map(s => `<span class="bg-indigo-50 border border-indigo-200 text-indigo-700 rounded-2xl px-4 py-1 shadow-sm">${s}</span>`).join('')}</div>`;
