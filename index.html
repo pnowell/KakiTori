@@ -757,6 +757,26 @@
             return array;
         }
 
+        const getMasteryPercent = (interval) => {
+            if (!interval) return 0;
+            const MIN_DISTANCE = 4;
+            const MAX_DISTANCE = 128;
+            const levelsAchieved = Math.log2(interval / MIN_DISTANCE);
+            const maxLevels = Math.log2(MAX_DISTANCE / MIN_DISTANCE);
+            let percent = (levelsAchieved / maxLevels) * 100;
+            return Math.max(0, Math.min(100, percent));
+        };
+
+        const getMasteryColor = (percent) => {
+            if (percent < 50) {
+                const hue = (percent / 50) * 60;
+                return `hsl(${hue}, 100%, 45%)`;
+            } else {
+                const hue = 60 + ((percent - 50) / 50) * 60;
+                return `hsl(${hue}, 100%, 40%)`;
+            }
+        };
+
         function renderSettings() {
             kanjiDomElements = {};
             const container = document.getElementById('kanji-list-container');
@@ -777,11 +797,27 @@
                 if (!a.endsWith('b') && b.endsWith('b')) return -1;
                 return 0;
             }).forEach(lesson => {
+                let totalLessonPercent = 0;
+                const numKanjiInLesson = lessons[lesson].length;
+
+                lessons[lesson].forEach(data => {
+                    const interval = kanjiIntervals[data.kanji] || 4; // MIN_DISTANCE
+                    totalLessonPercent += getMasteryPercent(interval);
+                });
+
+                const lessonPercent = numKanjiInLesson > 0 ? totalLessonPercent / numKanjiInLesson : 0;
+                const lessonColor = getMasteryColor(lessonPercent);
+
                 const groupDiv = document.createElement('div');
                 groupDiv.className = 'mb-4';
 
+                const headerFade = lessonPercent >= 100 ? 0 : 6;
                 const headerDiv = document.createElement('div');
                 headerDiv.className = 'group flex mb-2 bg-indigo-100 hover:bg-indigo-200 rounded-lg transition-colors overflow-hidden';
+                headerDiv.style.backgroundImage = `linear-gradient(to right, ${lessonColor} max(0%, calc(${lessonPercent}% - ${headerFade}px)), transparent ${lessonPercent}%)`;
+                headerDiv.style.backgroundSize = '100% 4px';
+                headerDiv.style.backgroundRepeat = 'no-repeat';
+                headerDiv.style.backgroundPosition = 'bottom left';
 
                 const cbWrapper = document.createElement('label');
                 cbWrapper.className = 'flex items-center pl-3 py-3 pr-2 cursor-pointer h-full';
@@ -840,8 +876,17 @@
                 });
 
                 lessons[lesson].forEach(data => {
+                    const interval = kanjiIntervals[data.kanji] || 4;
+                    const percent = getMasteryPercent(interval);
+                    const color = getMasteryColor(percent);
+
+                    const itemFade = percent >= 100 ? 0 : 6;
                     const itemDiv = document.createElement('div');
                     itemDiv.className = 'flex items-center p-1 rounded-md transition-colors';
+                    itemDiv.style.backgroundImage = `linear-gradient(to right, ${color} max(0%, calc(${percent}% - ${itemFade}px)), transparent ${percent}%)`;
+                    itemDiv.style.backgroundSize = '100% 3px';
+                    itemDiv.style.backgroundRepeat = 'no-repeat';
+                    itemDiv.style.backgroundPosition = 'bottom left';
 
                     const itemCb = document.createElement('input');
                     itemCb.type = 'checkbox';
