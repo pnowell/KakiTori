@@ -1397,10 +1397,6 @@
                 return;
             }
             if (currentKanjiData) {
-                kanjiIntervals[currentKanjiData.kanji] = MIN_DISTANCE;
-                if (storageAvailable) {
-                    localStorage.setItem('kanjiIntervalsPrefs', JSON.stringify(kanjiIntervals));
-                }
                 teachMode = true;
                 usedHintForKanji = true;
             }
