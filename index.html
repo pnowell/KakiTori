@@ -107,7 +107,7 @@
             <div class="flex items-center space-x-2">
                 <button id="daily-study-btn"
                     class="px-3 py-1.5 bg-indigo-600 text-white text-xs font-bold rounded-full hover:bg-indigo-700 transition-colors shadow-sm flex-shrink-0">
-                    Daily Study
+                    DAILY STUDY
                 </button>
                 <button id="search-toggle-btn"
                     class="p-2 bg-gray-200 text-gray-700 rounded-full hover:bg-gray-300 transition-colors">
@@ -331,7 +331,7 @@
 鳥|bird|チョウ|とり|13|0
 料|ingredients; fare|リョウ(リ)||13|0
 理|reason|(リョウ)リ||13|0
-特|special|トク; トッ||13|0
+特|special|トク(ベツ); トッ||13|0
 安|cheap; ease|アン|やす(い)|13|0
 飯|food; cooked rice|(ゴ)ハン||13|0
 肉|meat|ニク||13|0
@@ -1452,14 +1452,30 @@
                 }
             });
 
-            // (1) randomly select 6 kanji with at least 70% mastery
-            shuffleArray(highMastery).slice(0, 6).forEach(k => userSelectedKanji.add(k));
+            // Selection logic with fallback
+            const shuffledHigh = shuffleArray(highMastery);
+            const shuffledMid = shuffleArray(midMastery);
 
-            // (2) randomly select 12 kanji with between 5% and 70% mastery
-            shuffleArray(midMastery).slice(0, 12).forEach(k => userSelectedKanji.add(k));
+            // 1. High Mastery (Target: 6)
+            const pickedHigh = shuffledHigh.slice(0, 6);
+            pickedHigh.forEach(k => userSelectedKanji.add(k));
+            let remainder = 6 - pickedHigh.length;
 
-            // (3) select the next 2 kanji (not randomly, the first 2 kanji) with below 5% mastery
-            lowMastery.slice(0, 2).forEach(k => userSelectedKanji.add(k));
+            // 2. Mid Mastery (Target: 12 + remainder)
+            const pickedMid = shuffledMid.slice(0, 12 + remainder);
+            pickedMid.forEach(k => userSelectedKanji.add(k));
+            remainder = (12 + remainder) - pickedMid.length;
+
+            // 3. Low Mastery (Target: 2 + remainder, sequential)
+            const pickedLow = lowMastery.slice(0, 2 + remainder);
+            pickedLow.forEach(k => userSelectedKanji.add(k));
+            remainder = (2 + remainder) - pickedLow.length;
+
+            // 4. Final Fallback (Try to get remaining target from High Mastery again)
+            if (remainder > 0) {
+                const extraHigh = shuffledHigh.slice(pickedHigh.length, pickedHigh.length + remainder);
+                extraHigh.forEach(k => userSelectedKanji.add(k));
+            }
 
             // Update UI and state
             renderSettings();
