@@ -304,7 +304,7 @@
 画|picture|ガ; カク|え|11|0
 歌|to sing|カ|うた(う)|11|0
 市|city|シ|いち|11|0
-所|place|ジョ; ショ|ところ; どころ|11|0
+所|place; point; section|ジョ; ショ|ところ; どころ|11|0
 勉|to make efforts|ベン|つと(める)|11|0
 強|strong|キョウ; ゴウ|つよ(い)|11|0
 有|to exist|ユウ|あ(る)|11|0
@@ -358,7 +358,7 @@
 音|sound|オン|おと; ね|14|0
 楽|pleasure|ガク; ラク|たの(しい)|14|0
 医|doctor; medicine|(イ)シャ||14|0
-者|person|シャ|もの|14|0
+者|person (esp. in a role)|シャ|もの|14|0
 死|death; to die|シ|し(ぬ)|15|0
 意|mind; meaning|イ(ミ)||15|0
 味|flavor; taste|ミ|あじ|15|0
@@ -372,7 +372,7 @@
 走|to run|ソウ|はし(る)|15|0
 建|to build|ケン|た(てる); た(つ)|15|0
 地|ground|チ; ジ||15|0
-場|place|ジョウ|ば|15|0
+場|place; area; space|ジョウ|ば|15|0
 足|foot; leg|ソク|あし; た(りる)|15|0
 通|to pass; to commute|ツウ|とお(る); かよ(う)|15|0
 供|companion; offer|キョウ|とも; そな(える)|16|0
@@ -402,12 +402,12 @@
 品|goods; refinement|ヒン|しな; じな|17|0
 字|character; letter|(カン)ジ||17|0
 活|lively|カツ; カッ||17|0
-写|to copy|シャ|うつ(す)|17|0
+写|to copy|シャ(シン)|うつ(す)|17|0
 真|true; reality|シン|ま|17|0
 歩|to walk|ホ; ポ|ある(く)|17|0
 野|field|ヤ|の|17|0
 目|eye|モク|め|18|0
-的|target; -ish|テキ|まと|18|0
+的|target; -ish|...テキ(な)|まと|18|0
 力|power|リョク; リキ|ちから|18|0
 洋|ocean; overseas|ヨウ(フク)||18|0
 服|clothes|(ヨウ)フク||18|0
@@ -825,7 +825,7 @@
         const getMasteryPercent = (interval) => {
             if (!interval) return 0;
             const MIN_DISTANCE = 4;
-            const MAX_DISTANCE = 128;
+            const MAX_DISTANCE = 512;
             const levelsAchieved = Math.log2(interval / MIN_DISTANCE);
             const maxLevels = Math.log2(MAX_DISTANCE / MIN_DISTANCE);
             let percent = (levelsAchieved / maxLevels) * 100;
@@ -1443,9 +1443,9 @@
             KANJI_DATABASE.forEach(data => {
                 const interval = kanjiIntervals[data.kanji] || 4;
                 const percent = getMasteryPercent(interval);
-                if (percent >= 70) {
+                if (percent >= 85) {
                     highMastery.push(data.kanji);
-                } else if (percent >= 5) {
+                } else if (percent >= 15) {
                     midMastery.push(data.kanji);
                 } else {
                     lowMastery.push(data.kanji);
@@ -1464,12 +1464,12 @@
             // 2. Mid Mastery (Target: 12 + remainder)
             const pickedMid = shuffledMid.slice(0, 12 + remainder);
             pickedMid.forEach(k => userSelectedKanji.add(k));
-            remainder = (12 + remainder) - pickedMid.length;
+            remainder += 12 - pickedMid.length;
 
-            // 3. Low Mastery (Target: 2 + remainder, sequential)
-            const pickedLow = lowMastery.slice(0, 2 + remainder);
+            // 3. Low Mastery (Target: 2, sequential)
+            const pickedLow = lowMastery.slice(0, 2);
             pickedLow.forEach(k => userSelectedKanji.add(k));
-            remainder = (2 + remainder) - pickedLow.length;
+            remainder += 2 - pickedLow.length;
 
             // 4. Final Fallback (Try to get remaining target from High Mastery again)
             if (remainder > 0) {
