@@ -42,7 +42,7 @@
     </style>
 </head>
 
-<body class="bg-gray-100 h-screen w-screen flex flex-col items-center py-8 font-sans overflow-hidden">
+<body class="bg-gray-100 h-[100dvh] min-h-[100dvh] w-screen flex flex-col items-center py-2 md:py-8 font-sans overflow-hidden">
 
     <!-- Main View -->
     <div id="main-view" class="w-full max-w-md px-4 flex flex-col items-center h-full">
@@ -169,7 +169,7 @@
     <!-- Kanji Info View -->
     <div id="info-view" class="fixed inset-0 bg-gray-100 flex flex-col items-center z-50 hidden overflow-hidden">
         <div class="w-full max-w-md px-4 flex flex-col h-full pb-8">
-            <div class="flex justify-between items-end mb-2 mt-12 px-2">
+            <div class="flex justify-between items-end mb-2 mt-4 md:mt-12 px-2">
                 <h2 id="info-kanji" class="text-7xl font-black text-gray-800 leading-none"></h2>
                 <button id="close-info-btn"
                     class="p-2 bg-gray-200 text-gray-700 rounded-full hover:bg-gray-300 transition-colors shadow-sm">
@@ -1044,14 +1044,19 @@
                 let hasAnyKanji = false;
                 
                 chars.forEach(char => {
-                    const isKanji = KANJI_DATABASE.some(k => k.kanji === char);
+                    const isKanji = /[\u4e00-\u9faf\u3400-\u4dbf]/.test(char);
                     if (isKanji) {
                         hasAnyKanji = true;
-                        if (userSelectedKanji.has(char)) {
-                            hasActiveKanji = true;
-                        }
-                        const interval = kanjiIntervals[char] || MIN_DISTANCE;
-                        if (interval < MIN_INTERVAL_FOR_VOCAB) {
+                        const kanjiData = KANJI_DATABASE.find(k => k.kanji === char);
+                        if (kanjiData) {
+                            if (userSelectedKanji.has(char)) {
+                                hasActiveKanji = true;
+                            }
+                            const interval = kanjiIntervals[char] || MIN_DISTANCE;
+                            if (interval < MIN_INTERVAL_FOR_VOCAB) {
+                                allKanjiMastered = false;
+                            }
+                        } else {
                             allKanjiMastered = false;
                         }
                     }
@@ -2096,10 +2101,15 @@
                     const chars = Array.from(v.word);
                     let allMastered = true;
                     chars.forEach(char => {
-                        const isKanji = KANJI_DATABASE.some(k => k.kanji === char);
+                        const isKanji = /[\u4e00-\u9faf\u3400-\u4dbf]/.test(char);
                         if (isKanji) {
-                            const interval = kanjiIntervals[char] || MIN_DISTANCE;
-                            if (interval < MIN_INTERVAL_FOR_VOCAB) {
+                            const kanjiData = KANJI_DATABASE.find(k => k.kanji === char);
+                            if (kanjiData) {
+                                const interval = kanjiIntervals[char] || MIN_DISTANCE;
+                                if (interval < MIN_INTERVAL_FOR_VOCAB) {
+                                    allMastered = false;
+                                }
+                            } else {
                                 allMastered = false;
                             }
                         }
