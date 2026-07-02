@@ -108,7 +108,7 @@
         <div class="flex justify-between items-center w-full">
             <div id="progress-text" class="text-gray-500 font-medium">Stroke 1 / X</div>
             <button id="teach-btn"
-                class="px-4 py-2 bg-gray-200 hover:bg-gray-300 rounded-lg text-gray-700 font-medium transition-colors">
+                class="ml-auto px-4 py-2 bg-gray-200 hover:bg-gray-300 rounded-lg text-gray-700 font-medium transition-colors">
                 Teach Me
             </button>
         </div>
@@ -221,6 +221,7 @@
         let userSelectedKanji = new Set();
         let kanjiIntervals = {};
         let kanjiDomElements = {};
+        let vocabDomElements = {};
         let isMuted = false;
 
         let studyMode = 'kanji'; // 'kanji' or 'vocab'
@@ -558,6 +559,7 @@
             }
 
             kanjiDomElements = {};
+            vocabDomElements = {};
             const container = document.getElementById('kanji-list-container');
             container.innerHTML = '';
 
@@ -835,6 +837,13 @@
                         itemDiv.appendChild(itemLabel);
                         gridDiv.appendChild(itemDiv);
 
+                        vocabDomElements[key] = {
+                            itemDiv: itemDiv,
+                            expandLesson: () => {
+                                if (!isExpanded) toggleLesson();
+                            }
+                        };
+
                         itemDiv.addEventListener('click', () => {
                             showVocabInfo(data);
                         });
@@ -1044,7 +1053,7 @@
                 let hasAnyKanji = false;
                 
                 chars.forEach(char => {
-                    const isKanji = /[\u4e00-\u9faf\u3400-\u4dbf]/.test(char);
+                    const isKanji = /[\u4e00-\u9faf\u3400-\u4dbf\u3005\u3006]/.test(char);
                     if (isKanji) {
                         hasAnyKanji = true;
                         const kanjiData = KANJI_DATABASE.find(k => k.kanji === char);
@@ -1070,14 +1079,85 @@
             });
         }
 
+        let currentKanjiPromptHtml = '';
+        let currentVocabPromptHtml = '';
+
+        let kanjiDrawState = {
+            expectedStrokes: [],
+            currentStrokeIdx: 0,
+            completedStrokes: [],
+            activeStroke: [],
+            activeMorphs: [],
+            isSuccessAnimating: false,
+            isCharFadingOut: false,
+            charFadeOutStartTime: 0,
+            failCount: 0,
+            teachMode: false,
+            usedHintForKanji: false,
+            strokeColor: "#374151",
+            frameScale: 1,
+            frameOffsetX: 0,
+            frameOffsetY: 0
+        };
+
+        let vocabDrawState = {
+            expectedStrokes: [],
+            currentStrokeIdx: 0,
+            completedStrokes: [],
+            activeStroke: [],
+            activeMorphs: [],
+            isSuccessAnimating: false,
+            isCharFadingOut: false,
+            charFadeOutStartTime: 0,
+            failCount: 0,
+            teachMode: false,
+            usedHintForKanji: false,
+            strokeColor: "#374151",
+            frameScale: 1,
+            frameOffsetX: 0,
+            frameOffsetY: 0
+        };
+
+        function saveDrawState(mode) {
+            const state = (mode === 'kanji') ? kanjiDrawState : vocabDrawState;
+            state.expectedStrokes = expectedStrokes;
+            state.currentStrokeIdx = currentStrokeIdx;
+            state.completedStrokes = completedStrokes;
+            state.activeStroke = activeStroke;
+            state.activeMorphs = activeMorphs;
+            state.isSuccessAnimating = isSuccessAnimating;
+            state.isCharFadingOut = isCharFadingOut;
+            state.charFadeOutStartTime = charFadeOutStartTime;
+            state.failCount = failCount;
+            state.teachMode = teachMode;
+            state.usedHintForKanji = usedHintForKanji;
+            state.strokeColor = strokeColor;
+            state.frameScale = frameScale;
+            state.frameOffsetX = frameOffsetX;
+            state.frameOffsetY = frameOffsetY;
+        }
+
+        function restoreDrawState(mode) {
+            const state = (mode === 'kanji') ? kanjiDrawState : vocabDrawState;
+            expectedStrokes = state.expectedStrokes;
+            currentStrokeIdx = state.currentStrokeIdx;
+            completedStrokes = state.completedStrokes;
+            activeStroke = state.activeStroke;
+            activeMorphs = state.activeMorphs;
+            isSuccessAnimating = state.isSuccessAnimating;
+            isCharFadingOut = state.isCharFadingOut;
+            charFadeOutStartTime = state.charFadeOutStartTime;
+            failCount = state.failCount;
+            teachMode = state.teachMode;
+            usedHintForKanji = state.usedHintForKanji;
+            strokeColor = state.strokeColor;
+            frameScale = state.frameScale;
+            frameOffsetX = state.frameOffsetX;
+            frameOffsetY = state.frameOffsetY;
+        }
+
         function updateStudyModeUI() {
             const overlay = document.getElementById('vocab-canvas-overlay');
-            if (overlay) {
-                overlay.classList.remove('opacity-100');
-                overlay.classList.add('opacity-0');
-            }
-            promptMeaning.classList.remove('opacity-0');
-
             const mainModeKanji = document.getElementById('main-mode-kanji');
             const mainModeVocab = document.getElementById('main-mode-vocab');
             const drawTitleEl = document.querySelector('#main-view h1');
@@ -1090,12 +1170,23 @@
                 
                 canvas.parentElement.classList.remove('hidden');
                 document.getElementById('progress-text').parentElement.classList.remove('hidden');
+                progressText.classList.remove('hidden');
                 teachBtn.classList.remove('hidden');
                 
                 const vocabInputDiv = document.getElementById('vocab-input-div');
                 if (vocabInputDiv) vocabInputDiv.classList.add('hidden');
                 
                 if (drawTitleEl) drawTitleEl.textContent = 'Draw the Kanji for:';
+                
+                if (overlay) {
+                    overlay.classList.remove('opacity-100');
+                    overlay.classList.add('opacity-0');
+                }
+                promptMeaning.classList.remove('opacity-0');
+
+                if (currentKanjiPromptHtml) {
+                    promptMeaning.innerHTML = currentKanjiPromptHtml;
+                }
                 resizeCanvas();
             } else {
                 mainModeKanji.className = 'flex-1 py-2.5 text-center rounded-lg transition-all focus:outline-none cursor-pointer text-gray-500 hover:text-gray-700';
@@ -1103,22 +1194,54 @@
                 
                 if (vocabReviewMode === 'ja_to_en') {
                     canvas.parentElement.classList.add('hidden');
-                    document.getElementById('progress-text').parentElement.classList.add('hidden');
-                    teachBtn.classList.add('hidden');
+                    document.getElementById('progress-text').parentElement.classList.remove('hidden');
+                    progressText.classList.add('hidden');
+                    
+                    const vocabCheckBtn = document.getElementById('vocab-check-btn');
+                    if (vocabCheckBtn && vocabCheckBtn.textContent === 'Next') {
+                        teachBtn.classList.remove('hidden');
+                        teachBtn.textContent = 'Show Info';
+                    } else {
+                        teachBtn.classList.add('hidden');
+                    }
                     
                     const vocabInputDiv = document.getElementById('vocab-input-div');
                     if (vocabInputDiv) vocabInputDiv.classList.remove('hidden');
+                    
+                    if (overlay) {
+                        overlay.classList.remove('opacity-100');
+                        overlay.classList.add('opacity-0');
+                    }
+                    promptMeaning.classList.remove('opacity-0');
                 } else {
                     canvas.parentElement.classList.remove('hidden');
                     document.getElementById('progress-text').parentElement.classList.remove('hidden');
+                    progressText.classList.remove('hidden');
                     teachBtn.classList.remove('hidden');
                     
                     const vocabInputDiv = document.getElementById('vocab-input-div');
                     if (vocabInputDiv) vocabInputDiv.classList.add('hidden');
+                    
+                    if (isSuccessAnimating) {
+                        if (overlay) {
+                            overlay.classList.remove('opacity-0');
+                            overlay.classList.add('opacity-100');
+                        }
+                        promptMeaning.classList.add('opacity-0');
+                    } else {
+                        if (overlay) {
+                            overlay.classList.remove('opacity-100');
+                            overlay.classList.add('opacity-0');
+                        }
+                        promptMeaning.classList.remove('opacity-0');
+                    }
                     resizeCanvas();
                 }
                 
                 if (drawTitleEl) drawTitleEl.textContent = 'Vocabulary Review:';
+                if (currentVocabPromptHtml) {
+                    promptMeaning.innerHTML = currentVocabPromptHtml;
+                }
             }
         }
 
@@ -1190,6 +1313,7 @@
                 // Wrap segments as stylish chips to visually separate them and prevent awkward breaks
                 const segments = promptText.split(';').map(s => s.trim());
                 promptMeaning.innerHTML = `<div class="flex flex-wrap justify-center gap-2">${segments.map(s => `<span class="bg-indigo-50 border border-indigo-200 text-indigo-700 rounded-2xl px-4 py-1 shadow-sm">${s}</span>`).join('')}</div>`;
+                currentKanjiPromptHtml = promptMeaning.innerHTML;
 
                 expectedStrokes = paths.map(path => getPointsFromSvgPath(path, NUM_POINTS));
                 updateProgress();
@@ -1294,6 +1418,7 @@
 
                 
                 promptMeaning.appendChild(wordContainer);
+                currentVocabPromptHtml = promptMeaning.innerHTML;
 
                 const vocabInput = document.getElementById('vocab-input');
                 vocabInput.value = '';
@@ -1309,6 +1434,7 @@
             } else {
                 const segments = data.meaning.split(';').map(s => s.trim()).filter(s => s !== '');
                 promptMeaning.innerHTML = `<div class="flex flex-wrap justify-center gap-2">${segments.map(s => `<span class="bg-indigo-50 border border-indigo-200 text-indigo-700 rounded-2xl px-4 py-1 shadow-sm">${s}</span>`).join('')}</div>`;
+                currentVocabPromptHtml = promptMeaning.innerHTML;
                 
                 currentVocabCharIdx = 0;
                 renderVocabBlanks();
@@ -1461,6 +1587,7 @@
                     <span class="text-sm text-gray-500 font-medium">${currentVocabData.meaning}</span>
                 </div>
             `;
+            currentVocabPromptHtml = promptMeaning.innerHTML;
             
             if (vocabReviewMode === 'en_to_ja') {
                 promptMeaning.classList.add('opacity-0');
@@ -1493,6 +1620,23 @@
             if (storageAvailable) {
                 localStorage.setItem('vocabIntervalsPrefs', JSON.stringify(vocabIntervals));
             }
+
+            // Splice it back into the queue based on its new interval
+            if (userSelectedVocab.has(vocabKey)) {
+                let insertDist = vocabIntervals[vocabKey];
+                // Remove from current queue if present
+                const qi = vocabReviewQueue.indexOf(vocabKey);
+                if (qi !== -1) {
+                    vocabReviewQueue.splice(qi, 1);
+                }
+                
+                if (insertDist >= vocabReviewQueue.length) {
+                    vocabReviewQueue.unshift(vocabKey); // Front of queue (next up)
+                } else {
+                    // Splice it insertDist elements from the end (since we pop from the end)
+                    vocabReviewQueue.splice(vocabReviewQueue.length - insertDist, 0, vocabKey);
+                }
+            }
         }
 
         function checkVocabAnswer() {
@@ -1508,16 +1652,18 @@
             
             function cleanText(text) {
                 return text.toLowerCase()
+                           .replace(/\([^)]*\)/g, '')
                            .replace(/\b(to|a|an|the)\b/g, '')
                            .replace(/-/g, ' ')
                            .replace(/[.,\/#!$%\^&\*;:{}=_`~()?"']/g, "")
+                           .replace(/\b([a-z])\s+(?=[a-z]\b)/g, '$1')
                            .replace(/\s+/g, " ")
                            .trim();
             }
 
             const cleanUser = cleanText(userInput);
-            const meanings = currentVocabData.meaning.split(/;|\//).map(m => cleanText(m));
-            const isCorrect = meanings.some(m => m === cleanUser || m.includes(cleanUser) && cleanUser.length > 2);
+            const meanings = currentVocabData.meaning.split(';').map(m => cleanText(m));
+            const isCorrect = meanings.some(m => m === cleanUser);
 
             if (isCorrect || cleanUser === cleanText(currentVocabData.meaning)) {
                 vocabInput.readOnly = true;
@@ -1548,13 +1694,13 @@
                     });
                 }
                 
-                isSuccessAnimating = true;
-                successStartTime = performance.now();
-
                 recordVocabResult(currentVocabData.word + "_" + currentVocabData.reading, failCount < 3);
 
                 vocabCheckBtn.textContent = 'Next';
                 vocabCheckBtn.className = "mt-4 w-full bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-6 rounded-xl transition-all shadow-md focus:outline-none cursor-pointer";
+                
+                teachBtn.classList.remove('hidden');
+                teachBtn.textContent = 'Show Info';
             } else {
                 vocabInput.classList.add('animate-shake', 'border-red-500', 'bg-red-50');
                 setTimeout(() => vocabInput.classList.remove('animate-shake'), 500);
@@ -1573,11 +1719,11 @@
                     // Record failure in SRS
                     recordVocabResult(currentVocabData.word + "_" + currentVocabData.reading, false);
 
-                    isSuccessAnimating = true;
-                    successStartTime = performance.now();
-
                     vocabCheckBtn.textContent = 'Next';
                     vocabCheckBtn.className = "mt-4 w-full bg-slate-600 hover:bg-slate-700 text-white font-bold py-3 px-6 rounded-xl transition-all shadow-md focus:outline-none cursor-pointer";
+                    
+                    teachBtn.classList.remove('hidden');
+                    teachBtn.textContent = 'Show Info';
                 } else {
                     showMessage("Incorrect! Try again.");
                 }
@@ -1891,6 +2037,7 @@
         }
 
         canvas.addEventListener('pointerdown', (e) => {
+            if (e.pointerType === 'touch') e.preventDefault();
             if (isSuccessAnimating) {
                 if (studyMode === 'kanji') {
                     loadNextKanji();
@@ -1908,11 +2055,13 @@
         });
 
         canvas.addEventListener('pointermove', (e) => {
+            if (e.pointerType === 'touch') e.preventDefault();
             if (!isDrawing) return;
             activeStroke.push(getPointerPos(e));
         });
 
         canvas.addEventListener('pointerup', (e) => {
+            if (e.pointerType === 'touch') e.preventDefault();
             if (!isDrawing) return;
             isDrawing = false;
             canvas.releasePointerCapture(e.pointerId);
@@ -1920,7 +2069,10 @@
         });
 
         teachBtn.addEventListener('click', () => {
-            if (isSuccessAnimating) {
+            const vocabCheckBtn = document.getElementById('vocab-check-btn');
+            const isCompleted = isSuccessAnimating || (studyMode === 'vocab' && vocabCheckBtn && vocabCheckBtn.textContent === 'Next');
+
+            if (isCompleted) {
                 if (studyMode === 'kanji') {
                     showKanjiInfo(currentKanjiData);
                 } else {
@@ -2104,7 +2256,7 @@
                     const chars = Array.from(v.word);
                     let allMastered = true;
                     chars.forEach(char => {
-                        const isKanji = /[\u4e00-\u9faf\u3400-\u4dbf]/.test(char);
+                        const isKanji = /[\u4e00-\u9faf\u3400-\u4dbf\u3005\u3006]/.test(char);
                         if (isKanji) {
                             const kanjiData = KANJI_DATABASE.find(k => k.kanji === char);
                             if (kanjiData) {
@@ -2340,6 +2492,9 @@
             Object.values(kanjiDomElements).forEach(dom => {
                 dom.itemDiv.classList.remove('bg-yellow-200');
             });
+            Object.values(vocabDomElements).forEach(dom => {
+                dom.itemDiv.classList.remove('bg-yellow-200');
+            });
         }
 
         function executeSearch(query) {
@@ -2347,21 +2502,39 @@
             if (!query) return;
 
             let firstMatch = null;
-            KANJI_DATABASE.forEach(data => {
-                const dom = kanjiDomElements[data.kanji];
-                if (!dom) return;
+            if (studyMode === 'kanji') {
+                KANJI_DATABASE.forEach(data => {
+                    const dom = kanjiDomElements[data.kanji];
+                    if (!dom) return;
 
-                const matches = data.kanji.includes(query) ||
-                    data.meaning.toLowerCase().includes(query) ||
-                    data.onyomi.includes(query) ||
-                    data.kunyomi.includes(query);
+                    const matches = data.kanji.includes(query) ||
+                        data.meaning.toLowerCase().includes(query) ||
+                        data.onyomi.includes(query) ||
+                        data.kunyomi.includes(query);
 
-                if (matches) {
-                    dom.itemDiv.classList.add('bg-yellow-200');
-                    dom.expandLesson();
-                    if (!firstMatch) firstMatch = dom.itemDiv;
-                }
-            });
+                    if (matches) {
+                        dom.itemDiv.classList.add('bg-yellow-200');
+                        dom.expandLesson();
+                        if (!firstMatch) firstMatch = dom.itemDiv;
+                    }
+                });
+            } else {
+                VOCAB_DATABASE.forEach(data => {
+                    const key = data.word + "_" + data.reading;
+                    const dom = vocabDomElements[key];
+                    if (!dom) return;
+
+                    const matches = data.word.includes(query) ||
+                        data.meaning.toLowerCase().includes(query) ||
+                        data.reading.includes(query);
+
+                    if (matches) {
+                        dom.itemDiv.classList.add('bg-yellow-200');
+                        dom.expandLesson();
+                        if (!firstMatch) firstMatch = dom.itemDiv;
+                    }
+                });
+            }
 
             if (firstMatch) {
                 firstMatch.scrollIntoView({ behavior: 'smooth', block: 'center' });
@@ -2419,23 +2592,33 @@
         // --- MODE TOGGLES AND VOCAB CHECK HANDLERS ---
         document.getElementById('main-mode-kanji').addEventListener('click', () => {
             if (studyMode === 'kanji') return;
+            saveDrawState(studyMode);
             studyMode = 'kanji';
+            restoreDrawState('kanji');
             if (storageAvailable) localStorage.setItem('studyMode', 'kanji');
             updateStudyModeUI();
-            loadNextKanji();
+            if (expectedStrokes.length === 0 || !currentKanjiData || (currentKanjiData && !userSelectedKanji.has(currentKanjiData.kanji))) {
+                loadNextKanji();
+            }
         });
 
         document.getElementById('main-mode-vocab').addEventListener('click', () => {
             if (studyMode === 'vocab') return;
+            saveDrawState(studyMode);
             studyMode = 'vocab';
+            restoreDrawState('vocab');
             if (storageAvailable) localStorage.setItem('studyMode', 'vocab');
             updateStudyModeUI();
-            loadNextVocab();
+            if (!currentVocabData || (currentVocabData && !userSelectedVocab.has(currentVocabData.word + "_" + currentVocabData.reading))) {
+                loadNextVocab();
+            }
         });
 
         document.getElementById('settings-mode-kanji').addEventListener('click', () => {
             if (studyMode === 'kanji') return;
+            saveDrawState(studyMode);
             studyMode = 'kanji';
+            restoreDrawState('kanji');
             if (storageAvailable) localStorage.setItem('studyMode', 'kanji');
             updateStudyModeUI();
             renderSettings();
@@ -2443,7 +2626,9 @@
 
         document.getElementById('settings-mode-vocab').addEventListener('click', () => {
             if (studyMode === 'vocab') return;
+            saveDrawState(studyMode);
             studyMode = 'vocab';
+            restoreDrawState('vocab');
             if (storageAvailable) localStorage.setItem('studyMode', 'vocab');
             updateStudyModeUI();
             renderSettings();
@@ -2597,12 +2782,17 @@
         initApp();
 
         window.addEventListener('keydown', (e) => {
-            if (e.key === 'Enter' && isSuccessAnimating) {
+            if (e.key === 'Enter') {
                 if (e.target.closest('#vocab-input')) return;
                 if (studyMode === 'kanji') {
-                    loadNextKanji();
+                    if (isSuccessAnimating) {
+                        loadNextKanji();
+                    }
                 } else {
-                    loadNextVocab();
+                    const vocabCheckBtn = document.getElementById('vocab-check-btn');
+                    if (isSuccessAnimating || (vocabCheckBtn && vocabCheckBtn.textContent === 'Next')) {
+                        loadNextVocab();
+                    }
                 }
             }
         });
