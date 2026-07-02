@@ -1666,6 +1666,7 @@
             const isCorrect = meanings.some(m => m === cleanUser);
 
             if (isCorrect || cleanUser === cleanText(currentVocabData.meaning)) {
+                vocabInput.value = currentVocabData.meaning;
                 vocabInput.readOnly = true;
                 vocabInput.classList.remove('border-red-500', 'bg-red-50');
                 vocabInput.classList.add('border-green-500', 'bg-green-50');
@@ -1709,7 +1710,7 @@
                 playErrorBeep();
 
                 if (failCount >= 3) {
-                    vocabInput.value = currentVocabData.meaning.split(';')[0].trim();
+                    vocabInput.value = currentVocabData.meaning;
                     vocabInput.readOnly = true;
 
                     // Show furigana
