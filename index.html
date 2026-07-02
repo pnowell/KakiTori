@@ -1096,6 +1096,7 @@
                 if (vocabInputDiv) vocabInputDiv.classList.add('hidden');
                 
                 if (drawTitleEl) drawTitleEl.textContent = 'Draw the Kanji for:';
+                resizeCanvas();
             } else {
                 mainModeKanji.className = 'flex-1 py-2.5 text-center rounded-lg transition-all focus:outline-none cursor-pointer text-gray-500 hover:text-gray-700';
                 mainModeVocab.className = 'flex-1 py-2.5 text-center rounded-lg transition-all focus:outline-none cursor-pointer bg-indigo-600 text-white shadow-sm';
@@ -1114,6 +1115,7 @@
                     
                     const vocabInputDiv = document.getElementById('vocab-input-div');
                     if (vocabInputDiv) vocabInputDiv.classList.add('hidden');
+                    resizeCanvas();
                 }
                 
                 if (drawTitleEl) drawTitleEl.textContent = 'Vocabulary Review:';
@@ -1507,7 +1509,8 @@
             function cleanText(text) {
                 return text.toLowerCase()
                            .replace(/\b(to|a|an|the)\b/g, '')
-                           .replace(/[.,\/#!$%\^&\*;:{}=\-_`~()?"']/g, "")
+                           .replace(/-/g, ' ')
+                           .replace(/[.,\/#!$%\^&\*;:{}=_`~()?"']/g, "")
                            .replace(/\s+/g, " ")
                            .trim();
             }
