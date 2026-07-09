@@ -216,6 +216,150 @@
     </div>
 
     <script>
+        // --- MOBILE DEBUG CONSOLE ---
+        (function() {
+            const isDebugParam = new URLSearchParams(window.location.search).has('debug');
+            if (!isDebugParam) return;
+
+            // Create debug container
+            const container = document.createElement('div');
+            container.id = 'mobile-debug-log';
+            container.style.cssText = 'position:fixed;bottom:0;left:0;right:0;height:180px;background:rgba(17,24,39,0.95);color:#10B981;font-family:monospace;font-size:10px;z-index:99999;border-top:2px solid #374151;display:flex;flex-direction:column;pointer-events:auto;user-select:text;';
+
+            const header = document.createElement('div');
+            header.style.cssText = 'background:#1F2937;padding:4px 8px;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid #374151;font-weight:bold;color:#F3F4F6;';
+            header.innerHTML = '<span>Debug Log</span>';
+
+            const buttonContainer = document.createElement('div');
+            buttonContainer.style.cssText = 'display:flex;gap:8px;';
+
+            const clearBtn = document.createElement('button');
+            clearBtn.textContent = 'Clear';
+            clearBtn.style.cssText = 'background:#374151;color:#F3F4F6;border:none;padding:2px 6px;border-radius:3px;cursor:pointer;font-size:9px;';
+            clearBtn.onclick = () => { logArea.innerHTML = ''; };
+
+            const copyBtn = document.createElement('button');
+            copyBtn.textContent = 'Copy';
+            copyBtn.style.cssText = 'background:#374151;color:#F3F4F6;border:none;padding:2px 6px;border-radius:3px;cursor:pointer;font-size:9px;';
+            copyBtn.onclick = () => {
+                const logs = Array.from(logArea.childNodes).map(node => node.textContent).join('\n');
+                if (navigator.clipboard && navigator.clipboard.writeText) {
+                    navigator.clipboard.writeText(logs).then(() => {
+                        copyBtn.textContent = 'Copied!';
+                        setTimeout(() => { copyBtn.textContent = 'Copy'; }, 1000);
+                    }).catch(() => {
+                        fallbackCopy(logs);
+                    });
+                } else {
+                    fallbackCopy(logs);
+                }
+            };
+
+            function fallbackCopy(text) {
+                const textarea = document.createElement('textarea');
+                textarea.value = text;
+                textarea.style.position = 'fixed';
+                document.body.appendChild(textarea);
+                textarea.select();
+                try {
+                    document.execCommand('copy');
+                    copyBtn.textContent = 'Copied!';
+                    setTimeout(() => { copyBtn.textContent = 'Copy'; }, 1000);
+                } catch (err) {
+                    alert('Copy failed: ' + err);
+                }
+                document.body.removeChild(textarea);
+            }
+
+            const closeBtn = document.createElement('button');
+            closeBtn.textContent = 'Hide';
+            closeBtn.style.cssText = 'background:#374151;color:#F3F4F6;border:none;padding:2px 6px;border-radius:3px;cursor:pointer;font-size:9px;';
+            closeBtn.onclick = () => { container.style.display = 'none'; };
+
+            buttonContainer.appendChild(clearBtn);
+            buttonContainer.appendChild(copyBtn);
+            buttonContainer.appendChild(closeBtn);
+            header.appendChild(buttonContainer);
+
+            const logArea = document.createElement('div');
+            logArea.style.cssText = 'flex:1;overflow-y:auto;padding:8px;white-space:pre-wrap;word-break:break-all;';
+
+            container.appendChild(header);
+            container.appendChild(logArea);
+            document.body.appendChild(container);
+
+            function appendLog(type, args) {
+                const message = Array.from(args).map(arg => {
+                    if (arg && (arg instanceof Error || (typeof arg === 'object' && 'message' in arg && 'stack' in arg))) {
+                        return (arg.name || 'Error') + ": " + arg.message + "\n" + arg.stack;
+                    }
+                    if (typeof arg === 'object' && arg !== null) {
+                        try { return JSON.stringify(arg); } catch (e) { return String(arg); }
+                    }
+                    return String(arg);
+                }).join(' ');
+                
+                const logItem = document.createElement('div');
+                logItem.style.borderBottom = '1px solid #1F2937';
+                logItem.style.padding = '2px 0';
+                
+                const time = new Date().toTimeString().split(' ')[0];
+                const prefix = `[${time}] [${type}] `;
+                
+                if (type === 'ERROR') {
+                    logItem.style.color = '#EF4444';
+                } else if (type === 'WARN') {
+                    logItem.style.color = '#F59E0B';
+                }
+                
+                logItem.textContent = prefix + message;
+                logArea.appendChild(logItem);
+                logArea.scrollTop = logArea.scrollHeight;
+            }
+
+            // Override console
+            const _log = console.log;
+            const _warn = console.warn;
+            const _error = console.error;
+
+            console.log = function() {
+                _log.apply(console, arguments);
+                appendLog('LOG', arguments);
+            };
+            console.warn = function() {
+                _warn.apply(console, arguments);
+                appendLog('WARN', arguments);
+            };
+            console.error = function() {
+                _error.apply(console, arguments);
+                appendLog('ERROR', arguments);
+            };
+
+            // Uncaught exceptions
+            window.onerror = function(message, source, lineno, colno, error) {
+                appendLog('ERROR', [`Uncaught Exception: ${message} at ${source}:${lineno}:${colno}`, error]);
+                return false;
+            };
+
+            // Unhandled promise rejections
+            window.addEventListener('unhandledrejection', function(event) {
+                appendLog('ERROR', ['Unhandled Rejection:', event.reason]);
+            });
+
+            // Log diagnostic info on startup
+            setTimeout(() => {
+                console.log("Device Diagnostics:");
+                console.log("User Agent:", navigator.userAgent);
+                console.log("Pointer Events Support:", 'PointerEvent' in window);
+                console.log("Touch Events Support:", 'TouchEvent' in window);
+                console.log("Max Touch Points:", navigator.maxTouchPoints);
+                const rect = canvas.getBoundingClientRect();
+                console.log("Canvas width x height:", canvas.width, "x", canvas.height);
+                console.log("Canvas ClientRect:", rect.width, "x", rect.height, "left:", rect.left, "top:", rect.top);
+                console.log("Window Device Pixel Ratio:", window.devicePixelRatio);
+            }, 1000);
+        })();
+
         // --- STATE & DATA ---
         let KANJI_DATABASE = [];
         let userSelectedKanji = new Set();
@@ -404,8 +548,25 @@
 
         window.addEventListener('resize', () => {
             resizeCanvas();
-            // Removed manual render() call to avoid multiple animation loops
         });
+
+        function parseSVG(svgText) {
+            const svgStartIndex = svgText.indexOf('<svg');
+            let cleanedSvgText = svgStartIndex !== -1 ? svgText.substring(svgStartIndex) : svgText;
+            
+            // If the svg tag is missing the kvg namespace declaration (because it was defined in the stripped DOCTYPE), inject it.
+            if (!cleanedSvgText.includes('xmlns:kvg')) {
+                cleanedSvgText = cleanedSvgText.replace('<svg', '<svg xmlns:kvg="http://kanjivg.tagaini.net"');
+            }
+            
+            const parser = new DOMParser();
+            const doc = parser.parseFromString(cleanedSvgText, "image/svg+xml");
+            const errNode = doc.querySelector("parsererror");
+            if (errNode) {
+                throw new Error("SVG Parse Error: " + errNode.textContent);
+            }
+            return doc;
+        }
 
         // --- MATH & HEURISTICS ---
         function getPointsFromSvgPath(d, numPoints) {
@@ -914,6 +1075,7 @@
 
         // --- CSV LOADING AND INITIALIZATION ---
         async function initApp() {
+            console.log("initApp: Starting initialization");
             resizeCanvas();
             updateMuteUI();
 
@@ -923,33 +1085,41 @@
                     const savedMode = localStorage.getItem('studyMode');
                     if (savedMode) {
                         studyMode = savedMode;
+                        console.log("initApp: Loaded studyMode =", studyMode);
                     }
                 }
 
                 // Fetch kanji data
+                console.log("initApp: Fetching kanji.csv...");
                 const kanjiResponse = await fetch('kanji.csv');
+                console.log("initApp: kanji.csv status =", kanjiResponse.status);
                 if (!kanjiResponse.ok) throw new Error("Failed to fetch kanji.csv");
                 const kanjiText = await kanjiResponse.text();
                 parseKanjiCSV(kanjiText);
+                console.log("initApp: Parsed KANJI_DATABASE size =", KANJI_DATABASE.length, ", userSelectedKanji size =", userSelectedKanji.size);
 
                 // Fetch vocab data
+                console.log("initApp: Fetching vocab.csv...");
                 const vocabResponse = await fetch('vocab.csv');
+                console.log("initApp: vocab.csv status =", vocabResponse.status);
                 if (!vocabResponse.ok) throw new Error("Failed to fetch vocab.csv");
                 const vocabText = await vocabResponse.text();
                 parseVocabCSV(vocabText);
+                console.log("initApp: Parsed VOCAB_DATABASE size =", VOCAB_DATABASE.length);
 
                 // Recalculate implicit vocabulary selection based on loaded kanji selections
                 recalculateVocabSelection();
                 updateStudyModeUI();
 
                 // Load initial review card based on mode
+                console.log("initApp: Triggering initial load for mode =", studyMode);
                 if (studyMode === 'kanji') {
                     loadNextKanji();
                 } else {
                     loadNextVocab();
                 }
             } catch (err) {
-                console.error(err);
+                console.error("initApp error:", err);
                 promptMeaning.textContent = "Error loading application data!";
             }
 
@@ -1247,6 +1417,7 @@
 
         // --- GAME LOGIC ---
         async function loadNextKanji() {
+            console.log("loadNextKanji: Starting, userSelectedKanji size =", userSelectedKanji.size);
             if (userSelectedKanji.size === 0) {
                 promptMeaning.textContent = "No Kanji Selected";
                 expectedStrokes = [];
@@ -1260,11 +1431,14 @@
             // Fallback for initial startup
             if (reviewQueue.length === 0) {
                 reviewQueue = shuffleArray(Array.from(userSelectedKanji));
+                console.log("loadNextKanji: Initialized reviewQueue with size =", reviewQueue.length);
             }
 
             const nextKanjiChar = reviewQueue.pop();
+            console.log("loadNextKanji: Popped nextKanjiChar =", nextKanjiChar);
             const data = KANJI_DATABASE.find(k => k.kanji === nextKanjiChar);
             currentKanjiData = data;
+            console.log("loadNextKanji: currentKanjiData =", data);
 
             promptMeaning.textContent = "Loading...";
             activeStroke = [];
@@ -1290,18 +1464,22 @@
             frameOffsetY = (rect.height - (109 * frameScale)) / 2;
 
             try {
+                if (!data) throw new Error("Could not find kanji data for " + nextKanjiChar);
                 const unicodeStr = data.kanji.charCodeAt(0).toString(16).padStart(5, '0');
-                const url = `https://cdn.jsdelivr.net/gh/KanjiVG/kanjivg@master/kanji/${unicodeStr}.svg`;
+                const url = `svg/${unicodeStr}.svg`;
+                console.log("loadNextKanji: Fetching SVG from URL =", url);
 
                 const response = await fetch(url);
-                if (!response.ok) throw new Error("Failed to fetch SVG");
+                console.log("loadNextKanji: SVG response status =", response.status);
+                if (!response.ok) throw new Error("Failed to fetch SVG. Status: " + response.status);
 
                 const svgText = await response.text();
-                const parser = new DOMParser();
-                const doc = parser.parseFromString(svgText, "image/svg+xml");
+                console.log("loadNextKanji: SVG text length =", svgText.length);
+                const doc = parseSVG(svgText);
 
-                const pathEls = doc.querySelectorAll(`g[id^="kvg:StrokePaths"] path`);
+                const pathEls = doc.querySelectorAll('path');
                 const paths = Array.from(pathEls).map(el => el.getAttribute('d'));
+                console.log("loadNextKanji: Found SVG paths count =", paths.length);
 
                 const showEnglish = Math.random() > 0.5;
                 const combinedReadings = [data.onyomi, data.kunyomi].filter(r => r && r.trim() !== '').join('; ');
@@ -1316,9 +1494,10 @@
                 currentKanjiPromptHtml = promptMeaning.innerHTML;
 
                 expectedStrokes = paths.map(path => getPointsFromSvgPath(path, NUM_POINTS));
+                console.log("loadNextKanji: Populated expectedStrokes. Size =", expectedStrokes.length);
                 updateProgress();
             } catch (err) {
-                console.error(err);
+                console.error("loadNextKanji error:", err);
                 promptMeaning.textContent = "Error loading data!";
             }
         }
@@ -1520,16 +1699,15 @@
 
             try {
                 const unicodeStr = kanjiChar.charCodeAt(0).toString(16).padStart(5, '0');
-                const url = `https://cdn.jsdelivr.net/gh/KanjiVG/kanjivg@master/kanji/${unicodeStr}.svg`;
+                const url = `svg/${unicodeStr}.svg`;
 
                 const response = await fetch(url);
                 if (!response.ok) throw new Error("Failed to fetch SVG");
 
                 const svgText = await response.text();
-                const parser = new DOMParser();
-                const doc = parser.parseFromString(svgText, "image/svg+xml");
+                const doc = parseSVG(svgText);
 
-                const pathEls = doc.querySelectorAll(`g[id^="kvg:StrokePaths"] path`);
+                const pathEls = doc.querySelectorAll('path');
                 const paths = Array.from(pathEls).map(el => el.getAttribute('d'));
 
                 expectedStrokes = paths.map(path => getPointsFromSvgPath(path, NUM_POINTS));
@@ -2069,6 +2247,13 @@
             handleStrokeEnd();
         });
 
+        canvas.addEventListener('pointercancel', (e) => {
+            if (e.pointerType === 'touch') e.preventDefault();
+            if (!isDrawing) return;
+            isDrawing = false;
+            activeStroke = [];
+        });
+
         teachBtn.addEventListener('click', () => {
             const vocabCheckBtn = document.getElementById('vocab-check-btn');
             const isCompleted = isSuccessAnimating || (studyMode === 'vocab' && vocabCheckBtn && vocabCheckBtn.textContent === 'Next');
@@ -2295,11 +2480,10 @@
             // SVG Fetching
             try {
                 const unicodeStr = data.kanji.charCodeAt(0).toString(16).padStart(5, '0');
-                const url = `https://cdn.jsdelivr.net/gh/KanjiVG/kanjivg@master/kanji/${unicodeStr}.svg`;
+                const url = `svg/${unicodeStr}.svg`;
                 const response = await fetch(url);
                 const svgText = await response.text();
-                const parser = new DOMParser();
-                const doc = parser.parseFromString(svgText, "image/svg+xml");
+                const doc = parseSVG(svgText);
                 const pathEls = doc.querySelectorAll('path');
                 const paths = Array.from(pathEls)
                     .map(el => el.getAttribute('d'))
